@@ -4,7 +4,7 @@ setup(
     name='src',
     packages=find_packages(),
     version='0.1.0',
-    description='A short description of the project.',
-    author='reddit',
+    description='A package used to determine conflicting viewpoints in Subreddits.',
+    author='Reddit Conflicting Viewpoints',
     license='MIT',
 )
