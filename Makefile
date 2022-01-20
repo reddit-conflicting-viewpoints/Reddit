@@ -27,7 +27,7 @@ requirements: test_environment
 
 ## Make Dataset
 data: requirements
-	python3 src/data/scraper.py
+	$(PYTHON_INTERPRETER) src/data/scraper.py
 
 ## Delete all compiled Python files
 clean:
