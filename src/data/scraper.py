@@ -6,6 +6,7 @@ import pandas as pd
 from dataclasses import dataclass, field
 from typing import Tuple
 from pathlib import Path
+from src.utils import get_project_root
 from contextlib import asynccontextmanager
 from config import ScraperConfig, default_config
 
@@ -84,8 +85,9 @@ class AsyncRedditScraper:
     def save_to_file(self):
         if not self._data:
             pass
-        p = Path('.').joinpath('data/raw')
-        p.mkdir(exist_ok=True)
+        p = get_project_root().joinpath('data/raw')
+        # p = Path('.').joinpath('data/raw')
+        p.mkdir(parents=True, exist_ok=True)
         for data_obj in self._data:
             data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_posts.csv'), index=False)
             data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_comments.csv'), index = False)
