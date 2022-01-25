@@ -158,7 +158,7 @@ class PreProcess:
             return(lemma)
 
         df[column + '_tag'] = df[column + '_filtered'].apply(get_pos_tags)
-        df[column + '_lem'] = df[column + '_tag'].apply(get_lemma)
+        df[column + '_lemm'] = df[column + '_tag'].apply(get_lemma)
 
 
     @staticmethod
