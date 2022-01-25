@@ -1,8 +1,15 @@
 import pandas as pd
+import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer, PorterStemmer
 import re
+
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('averaged_perceptron_tagger')
+# nltk.download('wordnet')
+# nltk.download('omw-1.4')
 
 
 class PreProcess:
@@ -113,15 +120,60 @@ class PreProcess:
         df[column + '_stem'] = df[column + '_filtered'].apply(get_stems)
 
     @staticmethod
-    def preprocess(df, column):
+    def lemm(df, column):
+        """
+        Lemm the tokenized words. This will also POS TAG the tokenized words.
+
+        :param df: Dataframe to manipulate
+        :param column: The column to preprocess
+        """
+        def get_pos_tags(words):
+            '''
+            Helper function
+            Get the part of speech (POS) tags for the words
+            '''
+            tags=[]
+            for word in words:
+                tags.append(nltk.pos_tag([word]))
+            return tags
+
+        def get_lemma(word_tags):
+            '''
+            Helper function
+            Reduce the words to their base word (lemma) by using a lexicon
+            '''
+            wordnet_lemmatizer = WordNetLemmatizer()
+            lemma = []
+            for element in word_tags:
+                word = element[0][0]
+                pos = element[0][1]
+                tag = nltk.pos_tag([word])[0][1][0].upper()
+                tag_dict = {"J": wordnet.ADJ, # Mapping NLTK POS tags to WordNet POS tags
+                        "N": wordnet.NOUN,
+                        "V": wordnet.VERB,
+                        "R": wordnet.ADV}
+
+                wordnet_pos = tag_dict.get(tag, wordnet.NOUN)
+                lemma.append(wordnet_lemmatizer.lemmatize(word, wordnet_pos))
+            return(lemma)
+
+        df[column + '_tag'] = df[column + '_filtered'].apply(get_pos_tags)
+        df[column + '_lem'] = df[column + '_tag'].apply(get_lemma)
+
+
+    @staticmethod
+    def preprocess(df, column, lemm=False):
         """
         Preprocess the column by fill_na, tokenize, filtering, and stemming
 
         :param df: Dataframe to manipulate
         :param column: The column to preprocess
+        :param lemm: boolean to compute lemmatization. False by default.
         """
         PreProcess.fill_na(df, column)
         PreProcess.tokenize(df, column)
         PreProcess.filter_stopwords(df, column)
         PreProcess.stem(df, column)
+        if lemm:
+            PreProcess.lemm(df, column)
         return df
