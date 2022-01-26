@@ -99,6 +99,25 @@ class PreProcess:
             lambda s: list(filter(None, s)))
 
     @staticmethod
+    def remove_urls(df, column):
+        """
+        Function used to remove urls from strings
+
+        :param df: Dataframe to manipulate
+        :param column: The column to preprocess
+        """
+        def filter_urls(s):
+            """
+            Helpfer function used to replace URLs with empty string
+            """
+            if isinstance(s, str):
+                return re.sub(r'(https|http)?:\/\/(\w|\.|\/|\?|\=|\&|\%)*\b', '', s, flags=re.MULTILINE)
+            else:
+                return s
+
+        df[column] = df[column].apply(filter_urls)
+
+    @staticmethod
     def stem(df, column):
         """
         Stem the tokenized words
@@ -171,6 +190,7 @@ class PreProcess:
         :param lemm: boolean to compute lemmatization. False by default.
         """
         PreProcess.fill_na(df, column)
+        PreProcess.remove_urls(df, column)
         PreProcess.tokenize(df, column)
         PreProcess.filter_stopwords(df, column)
         PreProcess.stem(df, column)
