@@ -16,3 +16,4 @@ wordcloud
 nltk
 gensim
 spacy
+vaderSentiment
