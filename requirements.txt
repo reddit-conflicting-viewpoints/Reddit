@@ -17,3 +17,9 @@ nltk
 gensim
 spacy
 vaderSentiment
+hdbscan
+bertopic
+ipywidgets
+
+
+### If hdbscan fails to install on conda environment, run 'conda install -c conda-forge hdbscan' instead
