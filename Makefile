@@ -39,20 +39,22 @@ lint:
 	flake8 src
 
 ## Upload Data to S3
-sync_data_to_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync data/ s3://$(BUCKET)/data/
-else
-	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
-endif
+sync_data_to_blob:
+	azcopy sync 'data/' 'https://redditconflict.blob.core.windows.net/redditconflict/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2022-04-01T02:47:19Z&st=2022-01-29T19:47:19Z&spr=https&sig=CzbK3oh1Lyv%2BrFf7tjw%2F3AhcltmpTL4VkImMas%2FykfA%3D'
+# ifeq (default,$(PROFILE))
+# 	aws s3 sync data/ s3://$(BUCKET)/data/
+# else
+# 	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
+# endif
 
 ## Download Data from S3
-sync_data_from_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync s3://$(BUCKET)/data/ data/
-else
-	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
-endif
+sync_data_from_blob:
+	azcopy sync 'https://redditconflict.blob.core.windows.net/redditconflict/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2022-04-01T02:47:19Z&st=2022-01-29T19:47:19Z&spr=https&sig=CzbK3oh1Lyv%2BrFf7tjw%2F3AhcltmpTL4VkImMas%2FykfA%3D' 'data/'
+# ifeq (default,$(PROFILE))
+# 	aws s3 sync s3://$(BUCKET)/data/ data/
+# else
+# 	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
+# endif
 
 ## Set up python interpreter environment
 create_environment:
