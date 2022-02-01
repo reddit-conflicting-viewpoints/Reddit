@@ -16,6 +16,32 @@ import re
 class PreProcess:
     """
     Preprocessing pipeline class
+
+    Notes:
+        Some functions perform processing on the column itself.
+        Some functions perform processing on column_word_token.
+
+        Please read documentation above to know where the task is performed.
+
+        If writing your own manual function, please call functions that process
+        on the column itself first, then functions that perform on tokenized
+        columns. If needed, you can convert tokens back into a string by
+        calling the function: token_to_str.
+
+    Functions:
+        fill_na: performs on the column itself
+        tokenize: generates a column_word_token column
+        clean_special_characters: performs on column_word_token
+        filter_stopwords: performs on column_word_token
+        remove_urls: performs on the column itself
+        expand_contractions: performs on the column itself
+        remove_hashtags: performs on the column itself
+        remove_escape_chars: performs on the column itself
+        stem: performs on column_word_token
+        lemm: performs on column_word_token
+        token_to_str: converts the column_word_token back into a string in a
+            new column
+        preprocess: an all in one function
     """
 
     def __init__(self):
