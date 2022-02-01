@@ -20,6 +20,12 @@ vaderSentiment
 hdbscan
 bertopic
 ipywidgets
+torch
+torchvision
+torchaudio
+transformers 
+requests 
+beautifulsoup4
 
 
 ### If hdbscan fails to install on conda environment, run 'conda install -c conda-forge hdbscan' instead
