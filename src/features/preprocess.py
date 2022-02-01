@@ -108,14 +108,51 @@ class PreProcess:
         """
         def filter_urls(s):
             """
-            Helpfer function used to replace URLs with empty string
+            Helper function used to replace URLs with empty string
             """
             if isinstance(s, str):
                 return re.sub(r'(https|http)?:\/\/(\w|\.|\/|\?|\=|\&|\%)*\b', '', s, flags=re.MULTILINE)
             else:
                 return s
+         
+        def remove_hastags(s):
+            """
+            Helper function used to replace hashtags with empty string
+            """
+            if isinstance(s, str):
+                return re.sub(r'#', '', s)
+            else:
+                return s
 
+        def expand_contractions(s):
+            """
+            Helper function used to replace contractions with full forms
+            """
+            
+            #dictionary consisting of the contraction and the actual value
+            Apos_dict={"'s":" is","n't":" not","'m":" am","'ll":" will","'d":" would","'ve":" have","'re":" are"}
+            if isinstance(s, str):
+                #replace the contractions
+                for key,value in Apos_dict.items():
+                    if key in s:
+                        s=s.replace(key,value)
+            return s
+        
+        def remove_escape_chars(s):
+            """
+            Helper function used to replace escape character: \n, with empty string
+            """
+            if isinstance(s, str):
+                return re.sub(r'\n', '', s)
+            else:
+                return s
+            
         df[column] = df[column].apply(filter_urls)
+        df[column] = df[column].apply(remove_hastags)
+        df[column] = df[column].apply(expand_contractions)
+        df[column] = df[column].apply(remove_escape_chars)
+        
+        #TODO: slang-lookup
 
     @staticmethod
     def stem(df, column):
