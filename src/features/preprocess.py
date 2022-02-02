@@ -106,7 +106,8 @@ class PreProcess:
                     pattern = r'[^a-zA-Z\s]'
                 clean_text = re.sub(pattern, '', sent)
                 clean_text = clean_text.lower()  # Converting to lower case
-                clean_sentences.append(clean_text)
+                if clean_text != '':
+                	clean_sentences.append(clean_text)
             return clean_sentences
 
         df[column + '_word_token'] = df[column + '_word_token'].apply(
