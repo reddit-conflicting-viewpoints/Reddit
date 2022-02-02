@@ -48,11 +48,14 @@ class PreProcess:
         :param df: Dataframe to manipulate
         :param column: The column to preprocess
         """
-        def word_tokenize_helper(s):
-            if len(s) == 0:
+        def word_tokenize_helper(sentences):
+            if len(sentences) == 0:
                 return word_tokenize('')
             else:
-                return word_tokenize(s[0])
+                tokenized_list = []
+                for s in sentences:
+                    tokenized_list.extend(word_tokenize(s))
+                return tokenized_list
 
         df[column + '_word_token'] = df[column].apply(sent_tokenize).apply(
             lambda s: word_tokenize_helper(s))
