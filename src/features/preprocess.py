@@ -4,6 +4,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 import re
+import contractions
 
 
 nltk.download('punkt')
@@ -31,7 +32,8 @@ class PreProcess:
     Functions:
         fill_na: performs on the column itself
         tokenize: generates a column_word_token column
-        clean_special_characters: performs on column_word_token
+        clean_special_characters: performs on both column or column_word_token
+            Performs on column_word_token by default
         filter_stopwords: performs on column_word_token
         remove_urls: performs on the column itself
         expand_contractions: performs on the column itself
@@ -69,17 +71,20 @@ class PreProcess:
         :param column: The column to preprocess
         """
 
-        def word_tokenize_helper(s):
-            if len(s) == 0:
+        def word_tokenize_helper(sentences):
+            if len(sentences) == 0:
                 return word_tokenize('')
             else:
-                return word_tokenize(s[0])
+                tokenized_list = []
+                for s in sentences:
+                    tokenized_list.extend(word_tokenize(s))
+                return tokenized_list
 
         df[column + '_word_token'] = df[column].apply(sent_tokenize).apply(
             lambda s: word_tokenize_helper(s))
         return df
 
-    def clean_special_characters(self, df, column, remove_digits=False):
+    def clean_special_characters(self, df, column, tokenized_column=True, remove_digits=False):
         """
         Filter out stopwords and punctuation
         NOTE: MUST BE CALLED AFTER tokenize
@@ -88,10 +93,11 @@ class PreProcess:
 
         :param df: Dataframe to manipulate
         :param column: The column to preprocess
+        :param tokenized_column: Option to call function on original or tokenized column.
         :param remove_digits: Option to remove digits as special characters
         """
 
-        def get_clean_sentences(sentences, remove_digits):
+        def get_clean_sentences(sentences, tokenized_column, remove_digits):
             """
             Helper function
 
@@ -99,19 +105,27 @@ class PreProcess:
             digits
             """
             clean_sentences = []
-            for sent in sentences:
-                if not remove_digits:
-                    pattern = r'[^a-zA-Z0-9\s]'
-                else:
-                    pattern = r'[^a-zA-Z\s]'
-                clean_text = re.sub(pattern, '', sent)
-                clean_text = clean_text.lower()  # Converting to lower case
-                if clean_text != '':
-                	clean_sentences.append(clean_text)
-            return clean_sentences
+            if not remove_digits:
+                pattern = r'[^a-zA-Z0-9\s]'
+            else:
+                pattern = r'[^a-zA-Z\s]'
 
-        df[column + '_word_token'] = df[column + '_word_token'].apply(
-            lambda s: get_clean_sentences(s, remove_digits))
+            if tokenized_column:
+                for token in sentences:
+                    clean_text = re.sub(pattern, '', token)
+                    if clean_text != '':
+                        clean_sentences.append(clean_text)
+                return clean_sentences
+            else:
+                clean_text = re.sub(pattern, '', sentences[0])
+                return clean_text
+
+        if tokenized_column:
+            df[column + '_word_token'] = df[column + '_word_token'].apply(
+                lambda s: get_clean_sentences(s, tokenized_column, remove_digits))
+        else:
+            df[column] = df[column].apply(
+                lambda s: get_clean_sentences([s], tokenized_column, remove_digits))
         return df
 
     def filter_stopwords(self, df, column):
@@ -169,6 +183,7 @@ class PreProcess:
     def expand_contractions(self, df, column):
         """
         Function used to expand contractions of text
+        NOTE: Make sure to call this before clean_special_character
         Column: Raw strings
         Performs the task in-place (in the same column)
 
@@ -176,23 +191,26 @@ class PreProcess:
         :param column: The column to preprocess
         """
 
-        def expand_contractions_helper(s):
-            """
-            Helper function used to replace contractions with full forms
-            """
+        # def expand_contractions_helper(s):
+        #     """
+        #     Helper function used to replace contractions with full forms
+        #     """
 
-            # dictionary consisting of the contraction and the actual value
-            Apos_dict = {"'s": " is", "n't": " not", "'m": " am",
-                         "'ll": " will", "'d": " would", "'ve": " have",
-                         "'re": " are"}
-            if isinstance(s, str):
-                # replace the contractions
-                for key, value in Apos_dict.items():
-                    if key in s:
-                        s = s.replace(key, value)
-            return s
+        #     # dictionary consisting of the contraction and the actual value
+        #     Apos_dict = {"'s": " is", "n't": " not", "'m": " am",
+        #                  "'ll": " will", "'d": " would", "'ve": " have",
+        #                  "'re": " are"}
+        #     if isinstance(s, str):
+        #         # replace the contractions
+        #         for key, value in Apos_dict.items():
+        #             if key in s:
+        #                 s = s.replace(key, value)
+        #     return s
 
-        df[column] = df[column].apply(expand_contractions_helper)
+        # df[column] = df[column].apply(expand_contractions_helper)
+        # return df
+
+        df[column] = df[column].apply(contractions.fix)
         return df
 
     def remove_hashtags(self, df, column):
