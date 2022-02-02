@@ -284,6 +284,15 @@ class PreProcess:
             get_stems)
         return df
 
+    def to_lower(self, df, column):
+        """
+        Function used to lower case all the text
+
+        :param df: Dataframe to manipulate
+        :param column: The column to preprocess
+        """
+        df[column] = df[column].apply(lambda s: s.lower())
+
     def lemm(self, df, column):
         """
         Lemm the tokenized words. This will also POS TAG the tokenized words.
@@ -351,14 +360,15 @@ class PreProcess:
         1. fill_na for empty strings
         2. remove URLs
         3. expand contractions
-        4. remove hashtags
-        5. remove escape chars '\n'
+        4. lower case all the strings
+        5. remove hashtags
+        6. remove escape chars '\n'
         ### All of the above are performed in-place (the same column)
         ### Below generates a new column
-        6. tokenize the text into list of words
-        7. filter out special characters that are not alphabetical or numerical
-        8. filter stopwords
-        9. stemming/lemmatization
+        7. tokenize the text into list of words
+        8. filter out special characters that are not alphabetical or numerical
+        9. filter stopwords
+        10. stemming/lemmatization
 
         :param df: Dataframe to manipulate
         :param column: The column to preprocess
@@ -367,6 +377,7 @@ class PreProcess:
         self.fill_na(df, column)
         self.remove_urls(df, column)
         self.expand_contractions(df, column)
+        self.to_lower(df, column)
         self.remove_hashtags(df, column)
         self.remove_escape_chars(df, column)
         self.tokenize(df, column)
