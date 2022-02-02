@@ -26,6 +26,8 @@ torchaudio
 transformers 
 requests 
 beautifulsoup4
+contractions
 
 
 ### If hdbscan fails to install on conda environment, run 'conda install -c conda-forge hdbscan' instead
+### contractions has a dependency of pyahocorasick and may not install well on conda environment. pyahocorasick may need to run: 'conda config --add channels conda-forge' and 'conda install pyahocorasick' to install
