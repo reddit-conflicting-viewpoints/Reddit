@@ -84,7 +84,8 @@ class PreProcess:
             lambda s: word_tokenize_helper(s))
         return df
 
-    def clean_special_characters(self, df, column, tokenized_column=True, remove_digits=False):
+    def clean_special_characters(self, df, column, tokenized_column=True,
+                                 remove_digits=False):
         """
         Filter out stopwords and punctuation
         NOTE: MUST BE CALLED AFTER tokenize
@@ -93,7 +94,8 @@ class PreProcess:
 
         :param df: Dataframe to manipulate
         :param column: The column to preprocess
-        :param tokenized_column: Option to call function on original or tokenized column.
+        :param tokenized_column: Option to call function on original or
+            tokenized column.
         :param remove_digits: Option to remove digits as special characters
         """
 
@@ -122,10 +124,12 @@ class PreProcess:
 
         if tokenized_column:
             df[column + '_word_token'] = df[column + '_word_token'].apply(
-                lambda s: get_clean_sentences(s, tokenized_column, remove_digits))
+                lambda s: get_clean_sentences(
+                    s, tokenized_column, remove_digits))
         else:
             df[column] = df[column].apply(
-                lambda s: get_clean_sentences([s], tokenized_column, remove_digits))
+                lambda s: get_clean_sentences(
+                    [s], tokenized_column, remove_digits))
         return df
 
     def filter_stopwords(self, df, column):
