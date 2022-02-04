@@ -73,7 +73,6 @@ class AsyncRedditScraper:
                                         post.created])
                 comments = await post.comments()
                 await comments.replace_more(limit=None)
-                all_comments = await comments.list()
 
                 # DFS of the comments. (Appears in the same order as reddit)
                 comment_queue = comments[:]
@@ -91,6 +90,7 @@ class AsyncRedditScraper:
                     comment_idx += 1
 
                 # BFS
+                # all_comments = await comments.list()
                 # counter = 0
                 # for comment in all_comments:
                 #     if counter == self.config.max_comment_count:
@@ -121,8 +121,8 @@ class AsyncRedditScraper:
         # p = Path('.').joinpath('data/raw')
         p.mkdir(parents=True, exist_ok=True)
         for data_obj in self._data:
-            data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_posts.csv'), index=False)
-            data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_comments.csv'), index=False)
+            data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_posts.csv'), index=False)
+            data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_comments.csv'), index=False)
         return self
 
 
