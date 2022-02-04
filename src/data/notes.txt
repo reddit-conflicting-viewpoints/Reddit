@@ -1,0 +1,13 @@
+
+
+
+
+Comment class:
+
+There are comments with literally nothing inside of them. There are comments that are '[removed]'. Those have been removed by moderators
+
+https://asyncpraw.readthedocs.io/en/stable/code_overview/models/comment.html?highlight=comment#asyncpraw.models.Comment
+
+<class 'asyncpraw.models.reddit.comment.Comment'>                   
+                                                    
+['MISSING_COMMENT_MESSAGE', 'STR_FIELD', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattr__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_extract_submission_id', '_fetch', '_fetch_data', '_fetch_info', '_fetched', '_kind', '_reddit', '_replies', '_reset_attributes', '_safely_add_arguments', '_submission', '_url_parts', '_vote', 'all_awardings', 'approved_at_utc', 'approved_by', 'archived', 'associated_award', 'author', 'author_flair_background_color', 'author_flair_css_class', 'author_flair_richtext', 'author_flair_template_id', 'author_flair_text', 'author_flair_text_color', 'author_flair_type', 'author_fullname', 'author_is_blocked', 'author_patreon_flair', 'author_premium', 'award', 'awarders', 'banned_at_utc', 'banned_by', 'block', 'body', 'body_html', 'can_gild', 'can_mod_post', 'clear_vote', 'collapse', 'collapsed', 'collapsed_because_crowd_control', 'collapsed_reason', 'collapsed_reason_code', 'comment_type', 'controversiality', 'created', 'created_utc', 'delete', 'depth', 'disable_inbox_replies', 'distinguished', 'downs', 'downvote', 'edit', 'edited', 'enable_inbox_replies', 'fullname', 'gild', 'gilded', 'gildings', 'id', 'id_from_url', 'is_root', 'is_submitter', 'likes', 'link_id', 'load', 'locked', 'mark_read', 'mark_unread', 'mod', 'mod_note', 'mod_reason_by', 'mod_reason_title', 'mod_reports', 'name', 'no_follow', 'num_reports', 'parent', 'parent_id', 'parse', 'permalink', 'refresh', 'removal_reason', 'replies', 'reply', 'report', 'report_reasons', 'save', 'saved', 'score', 'score_hidden', 'send_replies', 'stickied', 'submission', 'subreddit', 'subreddit_id', 'subreddit_name_prefixed', 'subreddit_type', 'top_awarded_type', 'total_awards_received', 'treatment_tags', 'unblock_subreddit', 'uncollapse', 'unrepliable_reason', 'unsave', 'ups', 'upvote', 'user_reports']
