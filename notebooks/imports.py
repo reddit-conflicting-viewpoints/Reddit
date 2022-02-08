@@ -21,6 +21,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import requests
 from bs4 import BeautifulSoup
+import contractions
 
 nltk.download('punkt')
 nltk.download('stopwords')
