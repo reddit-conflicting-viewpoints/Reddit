@@ -107,7 +107,15 @@ class AsyncRedditScraper:
         return SubRedditData(subreddit_name, posts_df, comments_df)
 
     async def scrape(self):
-        logger.info(f'start scraping top {self.config.max_post_count} hottest posts with '
+        
+        scrape_order_str = {
+            'hot': 'hottest',
+            'new': 'newest',
+            'top': 'top',
+            'rising': 'rising'
+        }
+        
+        logger.info(f'start scraping top {self.config.max_post_count} {scrape_order_str[self.config.scrape_order]} posts with '
                    f'{self.config.max_comment_count} comments per post from the following subreddits: '
                     f'{", ".join(self.config.subreddit_list)}')
         self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
