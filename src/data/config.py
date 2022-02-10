@@ -1,7 +1,6 @@
 # config file for scraper
 from dataclasses import dataclass
 from typing import List
-import numpy as np
 
 
 @dataclass(frozen=True)
@@ -14,6 +13,6 @@ class ScraperConfig:
 
 default_config = scraper_config = ScraperConfig(
     subreddit_list=['computerscience'],
-    scrape_order='new',
-    max_post_count=10000,
-    max_comment_count=np.inf)
+    scrape_order='hot',
+    max_post_count=100000000000,
+    max_comment_count=90000000000000000)
