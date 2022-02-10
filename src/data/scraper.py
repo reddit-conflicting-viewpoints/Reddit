@@ -1,49 +1,66 @@
 import sys
+import time
 import logging
 import asyncio
 import asyncpraw
 import pandas as pd
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import List
 from pathlib import Path
-from src.utils import get_project_root
 from contextlib import asynccontextmanager
 from config import ScraperConfig, default_config
 
-# reddit API credentials
+#reddit API credentials
 CLIENT_ID = 'xG2uYfBViT_APANuInp5Yw'
 CLIENT_SECRET = 'ewGDf8V8LFdgCuH0VxmYUehgKq18ug'
 USER_AGENT = 'uw_msds_2021fall'
 
-# logger setup
+#logger setup
 handler = logging.StreamHandler(sys.stdout)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
+class TerminalError(Exception):
+    pass
+
+def async_retry(times=3, delay=0):
+    """
+    async retry decorator
+    """
+    def func_wrapper(fn):
+        async def wrapper(*args, **kwargs):
+            for _ in range(times):
+                try:
+                    return await fn(*args, **kwargs)
+                except Exception:
+                    time.sleep(delay)
+            raise TerminalError()
+        return wrapper
+    return func_wrapper
+
+
 
 @dataclass(frozen=True)
 class SubRedditData:
-    name: str
-    posts_df: pd.DataFrame = field(repr=False)
-    comments_df: pd.DataFrame = field(repr=False)
-
+    name:str
+    posts_df:pd.DataFrame = field(repr=False)
+    comments_df:pd.DataFrame = field(repr=False)
 
 class AsyncRedditScraper:
     def __init__(self, config: ScraperConfig):
         self.config = config
-        self._data: Tuple[SubRedditData] = None
+        self._data: List[SubRedditData] = []
 
     @asynccontextmanager
     async def _generate_session(self):
-        session = asyncpraw.Reddit(client_id=CLIENT_ID,
-                                   client_secret=CLIENT_SECRET,
-                                   user_agent=CLIENT_SECRET)
+        session =  asyncpraw.Reddit(client_id = CLIENT_ID,
+                             client_secret = CLIENT_SECRET,
+                             user_agent = CLIENT_SECRET)
         try:
             yield session
         except Exception:
-            logger.error(f'Error occured for one subreddit.')
-            raise
+            pass
         finally:
             await session.close()
 
@@ -53,92 +70,86 @@ class AsyncRedditScraper:
             posts_retrieved = []
             comments_retrieved = []
             subreddit = await session.subreddit(subreddit_name)
+            posts =[post async for post in
+                    subreddit.hot(limit = self.config.max_post_count)
+                    if not post.stickied]
 
-            scrape_order = {
-                'hot': subreddit.hot,
-                'new': subreddit.new,
-                'top': subreddit.top,
-                'rising': subreddit.rising
-            }
-
-            async for post in scrape_order[self.config.scrape_order](limit=self.config.max_post_count):
+            for post in posts:
                 posts_retrieved.append([post.id,
-                                        post.title,
-                                        post.score,
-                                        post.upvote_ratio,
-                                        post.subreddit,
-                                        post.url,
-                                        post.num_comments,
-                                        post.selftext,
-                                        post.created])
-                comments = await post.comments()
-                await comments.replace_more(limit=None)
+                        post.title,
+                        post.score,
+                        post.subreddit,
+                        post.url,
+                        post.num_comments,
+                        post.selftext,
+                        post.created])
 
-                # DFS of the comments. (Appears in the same order as reddit)
-                comment_queue = comments[:]
-                comment_idx = 0
-                while comment_queue and comment_idx < self.config.max_comment_count:
-                    comment = comment_queue.pop(0)
-                    comments_retrieved.append([
-                        post.id,
-                        comment.body,
-                        comment.id,
-                        comment.parent_id,
-                        comment.created_utc,
-                        comment.is_submitter])
-                    comment_queue[0:0] = comment.replies
-                    comment_idx += 1
-
-                # BFS
-                # all_comments = await comments.list()
-                # counter = 0
-                # for comment in all_comments:
-                #     if counter == self.config.max_comment_count:
-                #         break
-                #     comments_retrieved.append([post.id, comment.body, comment.parent_id])
-                #     counter += 1
-
+            comment_forests = await asyncio.gather(*[post.comments() for post in posts])
+            await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
+            #in place
+            for comment_forest in comment_forests:
+                top_comments = comment_forest.list()[:self.config.max_comment_count]
+                while top_comments:
+                    comment = top_comments.pop()
+                    if comment.stickied:
+                        continue
+                    comments_retrieved.append([comment.submission.id,
+                                                comment.name,
+                                            comment.body,
+                                            comment.ups,
+                                            comment.downs,
+                                            comment.controversiality,
+                                            comment.total_awards_received,
+                                            comment.score,
+                                            comment.locked,
+                                            comment.collapsed]
+                                            )
         posts_df = pd.DataFrame(posts_retrieved,
-                               columns=['post_id', 'title', 'score', 'upvote_ratio', 'subreddit', 'url',
+                            columns=['post_id','title', 'score','subreddit','url',
                                         'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                  columns=['post_id', 'comment', 'comment_id', 'parent_id', 'created', 'is_submitter'])
-        logger.info(f'done scraping subreddit: {subreddit_name}')
+                                columns=['post_id','comment_id','comment','up_vote_count',
+                                        'down_vote_count','controversiality', 'total_awards_received',
+                                        'score','is_locked','is_collapsed'
+                                        ])
         return SubRedditData(subreddit_name, posts_df, comments_df)
 
+    @async_retry(times=3, delay=10)
     async def scrape(self):
-        
-        scrape_order_str = {
-            'hot': 'hottest',
-            'new': 'newest',
-            'top': 'top',
-            'rising': 'rising'
-        }
-        
-        logger.info(f'start scraping top {self.config.max_post_count} {scrape_order_str[self.config.scrape_order]} posts with '
+        logger.info(f'start scraping top {self.config.max_post_count} hotest posts with '
                    f'{self.config.max_comment_count} comments per post from the following subreddits: '
                     f'{", ".join(self.config.subreddit_list)}')
-        self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
+        try:
+            self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
                                             subreddit_name in self.config.subreddit_list))
+        except Exception:
+            logger.error("failed to scrape, retrying...")
+            raise
         return self
 
     def save_to_file(self):
         if not self._data:
             pass
-        p = get_project_root().joinpath('data/raw')
-        # p = Path('.').joinpath('data/raw')
-        p.mkdir(parents=True, exist_ok=True)
+        p = Path('.').joinpath('data')
+        p.mkdir(exist_ok=True)
         for data_obj in self._data:
-            data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_posts.csv'), index=False)
-            data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_comments.csv'), index=False)
+            data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_posts.csv'), index=False)
+            data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_comments.csv'), index = False)
         return self
-
 
 async def main():
     scraper = AsyncRedditScraper(default_config)
     scraped = await scraper.scrape()
+    logger.info("All Success!")
+    for data_obj in scraped._data:
+        logger.info(f"Subreddit {data_obj.name} retrieved "
+                    f"{data_obj.posts_df.shape[0]} posts and "
+                    f"{data_obj.comments_df.shape[0]} comments.")
     scraped.save_to_file()
 
 
 if __name__ == '__main__':
+    tik = time.perf_counter()
     asyncio.run(main())
+    tok = time.perf_counter()
+    logger.info(f"total run time {tok-tik}")
