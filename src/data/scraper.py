@@ -81,7 +81,7 @@ class AsyncRedditScraper:
             }
 
             posts = [post async for post in
-                     scrape_order[self.config.scrape_order](limit=self.config.max_post_count + 1)
+                     scrape_order[self.config.scrape_order](limit=self.config.max_post_count)
                      if not post.stickied]
 
             for post in posts:
