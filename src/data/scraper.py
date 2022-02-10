@@ -81,7 +81,7 @@ class AsyncRedditScraper:
             }
 
             posts = [post async for post in
-                     scrape_order[self.config.scrape_order](limit=self.config.max_post_count)
+                     scrape_order[self.config.scrape_order](limit=self.config.max_post_count + 1)
                      if not post.stickied]
 
             for post in posts:
@@ -95,64 +95,35 @@ class AsyncRedditScraper:
                                         post.selftext,
                                         post.created])
 
-            if self.config.tree:
-                comment_forests = await asyncio.gather(*[post.comments() for post in posts])
-                await asyncio.gather(*[comment_forest.replace_more(limit=None) for comment_forest in comment_forests])
-
-                for comment_forest in comment_forests:
-
-                    # DFS of the comments
-                    comment_queue = comment_forest[:]
-                    comment_idx = 0
-                    while comment_queue and comment_idx < self.config.max_comment_count:
-                        comment = comment_queue.pop(0)
-                        if comment.stickied:
-                            continue
-                        comments_retrieved.append([post.id,
-                                                   comment.id,
-                                                   comment.parent_id,
-                                                   comment.name,
-                                                   comment.body,
-                                                   comment.ups,
-                                                   comment.downs,
-                                                   comment.controversiality,
-                                                   comment.total_awards_received,
-                                                   comment.score,
-                                                   comment.locked,
-                                                   comment.collapsed,
-                                                   comment.is_submitter,
-                                                   comment.created_utc])
-                        comment_queue[0:0] = comment.replies
-                        comment_idx += 1
-            else:
-                comment_forests = await asyncio.gather(*[post.comments() for post in posts])
-                await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
-                # in place
-                for comment_forest in comment_forests:
-                    top_comments = comment_forest.list()[:self.config.max_comment_count]
-                    while top_comments:
-                        comment = top_comments.pop()
-                        if comment.stickied:
-                            continue
-                        comments_retrieved.append([post.id,
-                                                   comment.id,
-                                                   comment.parent_id,
-                                                   comment.name,
-                                                   comment.body,
-                                                   comment.ups,
-                                                   comment.downs,
-                                                   comment.controversiality,
-                                                   comment.total_awards_received,
-                                                   comment.score,
-                                                   comment.locked,
-                                                   comment.collapsed,
-                                                   comment.is_submitter,
-                                                   comment.created_utc])
+            
+            comment_forests = await asyncio.gather(*[post.comments() for post in posts])
+            await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
+            # in place
+            for comment_forest in comment_forests:
+                top_comments = comment_forest.list()[:self.config.max_comment_count][::-1]
+                while top_comments:
+                    comment = top_comments.pop()
+                    if comment.stickied:
+                        continue
+                    comments_retrieved.append([comment.submission.id,
+                                               comment.id,
+                                               comment.parent_id,
+                                               comment.body,
+                                               comment.ups,
+                                               comment.downs,
+                                               comment.controversiality,
+                                               comment.total_awards_received,
+                                               comment.score,
+                                               comment.locked,
+                                               comment.collapsed,
+                                               comment.is_submitter,
+                                               comment.created_utc])
+                    
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'score', 'upvote_ratio', 'subreddit',' url',
                                          'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                   columns=['post_id', 'comment_id', 'parent_id', 'name', 'comment',
+                                   columns=['post_id', 'comment_id', 'parent_id', 'comment',
                                             'up_vote_count', 'down_vote_count', 'controversiality',
                                             'total_awards_received', 'score', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
