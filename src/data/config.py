@@ -12,7 +12,7 @@ class ScraperConfig:
 
 
 default_config = scraper_config = ScraperConfig(
-    subreddit_list=['computerscience'],
+    subreddit_list=['computerscience', 'music', 'loseit', 'AmItheAsshole', 'NoStupidQuestions', 'antiwork'],
     scrape_order='hot',
     max_post_count=100000000000,
     max_comment_count=90000000000000000)
