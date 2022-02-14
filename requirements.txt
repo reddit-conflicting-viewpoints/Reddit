@@ -27,6 +27,7 @@ transformers
 requests 
 beautifulsoup4
 contractions
+flask
 
 
 ### If hdbscan fails to install on conda environment, run 'conda install -c conda-forge hdbscan' instead
