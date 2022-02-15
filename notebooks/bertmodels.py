@@ -1,0 +1,263 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from src.features.preprocess import PreProcess #DEPENDENCY
+
+from bertopic import BERTopic
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+import requests
+from bs4 import BeautifulSoup
+import contractions
+
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords, wordnet
+from nltk.probability import FreqDist
+from nltk.stem import WordNetLemmatizer, PorterStemmer
+import re
+import contractions
+from pprint import pprint
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+class BertModels:
+    """
+    BERT topic modeling and sentiment analysis pipeline class
+
+    Notes:
+        
+
+    Functions:
+        
+        
+        DELETE:fill_na: performs on the column itself
+        
+    """
+
+    
+    def __init__(self, subreddit='music', sort_type='hot'):
+        
+        #for sentiment analysis
+        self.tokenizer = AutoTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
+        self.sentiment_model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
+        
+        self.data = None
+        self.posts_df = pd.read_csv('../data/raw/{}_{}_posts.csv'.format(subreddit, sort_type))
+        self.comments_df = pd.read_csv('../data/raw/{}_{}_comments.csv'.format(subreddit, sort_type))
+        self.model = None
+        self.topics = None
+        self.docs = None
+        self.topic_probs = None
+            
+    def eda(self, tdf, pre='body'):
+        
+        df = tdf.copy()
+        prep = PreProcess()
+        
+        ###
+        print('Remove Escape Characters')
+        prep.remove_escape_chars(df, pre)
+        
+        print('Clean Special Characters')
+        prep.clean_special_characters(df, pre)
+        ###
+        
+        print("Number of Entries: ",df.shape[0])
+        print("Columns: ",df.columns)
+
+        all_words = [word for tokens in df[pre + '_word_token'] for word in tokens]
+        post_lengths = [len(tokens) for tokens in df[pre + '_word_token']]
+        vocab = sorted(list(set(all_words)))
+
+        print('{} words total (after preprocessing), with a vocabulary size of {}'.format(len(all_words), len(vocab)))
+        print('Max entry length is {}'.format(max(post_lengths)))
+
+        flat_words = [item for sublist in df[pre + '_word_token'] for item in sublist]
+        word_freq = FreqDist(flat_words)
+        fdf = pd.DataFrame(word_freq.most_common(20), columns=['word', 'frequency'])
+        fdf.plot(kind='bar', x='word', rot=70)
+        plt.show()
+        
+        df[pre + '_length'] = df[pre].apply(lambda x: len(x.split()))
+        print('Frequency Distribution of words per entry:')
+        df[pre + '_length'].hist()
+        plt.xlabel("Number of Words")
+        plt.ylabel("Count of Entries")
+        plt.show()
+        
+    def topic_preprocess(self, df, col):
+        
+        print('********Preprocessing DataFrame for Topic Modeling*********')
+        prep = PreProcess()
+        
+        df[col] = df[col].astype(str)
+        df = df[df[col] != 'nan']
+        df = df.reset_index()
+              
+        print('Fill NaNs')
+        prep.fill_na(df, col)
+        
+        print('Remove URLs')
+        prep.remove_urls(df, col)
+        
+        print('Expand Contractions')
+        prep.expand_contractions(df, col)
+        
+#         print('Remove Escape Characters')
+#         prep.remove_escape_chars(df, col)
+        
+        print('Make Lowercase')
+        prep.to_lower(df, col)
+
+        print('Tokenize')
+        prep.tokenize(df, col)
+        
+#         print('Clean Special Characters')
+#         prep.clean_special_characters(df, col)
+        
+        print('Filter Stopwords')
+        prep.filter_stopwords(df, col)
+        
+        print('Lemmatization')
+        prep.lemm(df, col)
+        return df
+    
+    def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
+        
+        try:
+            df['body_string'] = df[col].apply(lambda x: ' '.join(map(str, x)))
+            body_df = df.reset_index()
+        except:
+            print('ERROR: Need to preprocess')
+            return
+        
+        docs = list(body_df.body_string)
+        self.docs = docs
+        print('Number of entries being modeled:', len(docs))
+        
+        print('Intiailizing model and training')
+        self.model = BERTopic(language="english", calculate_probabilities=calculate_probabilities, verbose=verbose)
+        topics, probs = self.model.fit_transform(docs)
+        self.topics = topics
+        self.topic_probs = probs
+        
+        if visualize:
+            if self.model==None:
+                print('ERROR: No model.')
+                return
+        
+            self.topic_viz()
+        
+    def topic_viz(self):
+        
+        if self.model==None:
+            print('ERROR: No model.')
+            return
+        
+        print('Top 5 Topics Frequency:')
+        freq = self.model.get_topic_info()
+        freq.plot(kind='bar', x='Name', y='Count', rot=70)
+        plt.show()
+        
+        try:
+            print('Intertopic Distance Map:')
+            fig1 = self.model.visualize_topics()
+            fig1.show()
+
+            print('Topic Probability Distribution')
+            fig2 = self.model.visualize_distribution(self.topic_probs[200], min_probability=0.015)
+            fig2.show()
+
+            print('Topic Word Scores')
+            fig3 = self.model.visualize_barchart(top_n_topics=10)
+            fig3.show()
+            
+        except:
+            print("ERROR: Not enough topics!")
+            
+      
+    def get_topics(self):
+        
+        if self.model==None:
+            print('ERROR: No model.')
+            return
+
+        print("Topics are:")
+        print(self.model.get_topic_info())
+        
+        #NOTE: can also implement find topics
+        
+    def reduce_topics(self, nr_topics=5):
+        
+        if self.model==None:
+            print('ERROR: No model.')
+            return
+            
+        new_topics, new_probs = self.model.reduce_topics(self.docs, self.topics, self.topic_probs, nr_topics=nr_topics)
+        self.topics = new_topics
+        self.probs = new_probs
+        
+        print("Updating topic model with reduced topics set.")
+        self.model.update_topics(self.docs, self.topics, n_gram_range=(1, 3))
+        
+        print('Reduced topic distributions:')
+        fig = self.model.visualize_barchart(top_n_topics=10)
+        fig.show()
+    
+        
+    def save_topic_model(self):
+        pass
+        
+    def sentiment_preprocess(self, df, col):
+        
+        print('********Preprocessing DataFrame for Sentiment Analysis*********')
+        df[col] = df[col].astype(str)
+        df = df[df[col] != 'nan']
+        df = df.reset_index()
+              
+        
+        prep = PreProcess()
+        
+        print('Fill NaNs')
+        prep.fill_na(df, col)
+        
+        print('Remove URLs')
+        prep.remove_urls(df, col)
+        
+        print('Expand Contractions')
+        prep.expand_contractions(df, col)
+        
+        print('Remove escape characters.')
+        prep.remove_escape_chars(df, col)
+        
+        return df
+            
+    def sentiment_analysis(self, df, col):
+        
+        print('********Sentiment Analysis*********')
+        def sentiment_score(post):
+            '''
+            For sentiment scoring of posts.
+            '''
+            tokens = self.tokenizer.encode(post, return_tensors='pt')
+            result = self.sentiment_model(tokens)
+            return int(torch.argmax(result.logits))+1
+        
+        df['sentiment'] = df['body'].apply(lambda x: sentiment_score(x[:512]))
+        return df
+ 
+    
+    def sentiment_viz(self, df):
+        if 'sentiment' not in df.columns:
+            print("ERROR: No sentiments available.")
+            return
+        
+        df.sentiment.value_counts().loc[[1, 2, 3, 4, 5]].plot(kind='bar', xlabel='sentiment', ylabel='frequency')
+        pprint(df.sentiment.value_counts().loc[[1, 2, 3, 4, 5]])
+        plt.show()
+   
