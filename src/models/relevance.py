@@ -28,6 +28,12 @@ class Relevance:
         :return: The dataframe with relevance score column
         """
         
+        if 'title' not in df.columns:
+            raise Exception('Missing title column. Merge posts and columns')
+        
+        if 'comment' not in df.columns:
+            raise Exception('Missing comment column. Merge posts and columns')
+        
         if self.compared_with not in ['title', 'body', 'title-body']:
             return self.generate_relevance_with_parents(df)
 
