@@ -27,6 +27,7 @@ transformers
 requests 
 beautifulsoup4
 contractions
+scikit-learn
 flask
 
 
