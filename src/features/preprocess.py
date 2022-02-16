@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords, wordnet
@@ -353,6 +354,30 @@ class PreProcess:
 
         df[column + '_untokenized'] = df[column + '_word_token'].apply(
             lambda s: ' '.join(s))
+        return df
+
+    @staticmethod
+    def get_parent_comment(df):
+        """
+        Generates parent_comment column. Finds the parent of a column.
+        Must have 'comment' and 'parent_id' in dataframe.
+        
+        :param df: Dataframe to manipulate
+        """
+        parent_comments = []
+        for i in range(len(df)):
+            if pd.isna(df.iloc[i]['parent_id']):
+                parent_comments.append(np.nan)
+                continue
+            parent_tier, parent_id = df.iloc[i]['parent_id'].split('_')
+
+            # If parent is post, then no parent comment
+            if parent_tier == 't3':
+                parent_comments.append('')
+                continue
+
+            parent_comments.append(df[df['comment_id'] == parent_id].iloc[0]['comment'])
+        df['parent_comment'] = parent_comments
         return df
 
     def preprocess(self, df, column, lemm=False):
