@@ -4,6 +4,7 @@ from src.utils import get_project_root
 from src.features.preprocess import PreProcess
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from multiprocessing import Pool
 
 
 class Relevance:
@@ -27,7 +28,7 @@ class Relevance:
         :param df: The dataframe to run relevance on. Make sure the dataframe has posts and comments merged
         :return: The dataframe with relevance score column
         """
-        
+
         if 'title' not in df.columns:
             raise Exception('Missing title column. Merge posts and columns')
         
@@ -44,32 +45,39 @@ class Relevance:
         pp.fill_na(title_body_comment, 'body')
         # pp.fill_na(title_body_comment, 'comment')
 
-        similarities = np.array([])
+        list_of_df = []
         for post_id in title_body_comment['post_id'].unique():
-            temp = title_body_comment[title_body_comment['post_id'] == post_id]
-            if pd.isnull(temp.iloc[0]['comment']):
-                similarities = np.append(similarities, 0)
-                continue
-            title = temp.iloc[0]['title']
-            body = temp.iloc[0]['body']            
-
-            compared_dict = {
-                'title': title,
-                'body': body,
-                'title-body': title + ' ' + body
-            }
-
-            topic = compared_dict[self.compared_with]
-
-            comments = temp['comment'].to_list()
-            comments.append(topic)
-
-            sentence_embeddings = self.model.encode(comments)
-            similarity = cosine_similarity([sentence_embeddings[-1]], sentence_embeddings[:-1])
-            similarities = np.append(similarities, similarity.flatten())
-        df['relevance'] = similarities
+            list_of_df.append(title_body_comment[title_body_comment['post_id'] == post_id])
+            
+        with Pool() as p:
+            results = p.map(self.get_score, list_of_df)
+        temp = pd.concat(results)
+        df['relevance'] = temp['relevance']
         self.df = df
         return df
+
+    def get_score(self, df):
+        if pd.isnull(df.iloc[0]['comment']):
+            df['relevance'] = 0
+            return df
+        title = df.iloc[0]['title']
+        body = df.iloc[0]['body']
+
+        compared_dict = {
+            'title': title,
+            'body': body,
+            'title-body': title + ' ' + body
+        }
+
+        topic = compared_dict[self.compared_with]
+
+        comments = df['comment'].to_list()
+        comments.append(topic)
+        sentence_embeddings = self.model.encode(comments)
+        similarity = cosine_similarity([sentence_embeddings[-1]], sentence_embeddings[:-1])
+        df['relevance'] = similarity.flatten()
+        return df
+            
     
     def generate_relevance_with_parents(self, df):
         """
