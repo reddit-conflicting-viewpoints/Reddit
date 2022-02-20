@@ -20,6 +20,8 @@ import re
 import contractions
 from pprint import pprint
 
+import os
+
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
@@ -44,6 +46,8 @@ class BertModels:
     def __init__(self, subreddit='Music', sort_type='hot'):
 
         #for sentiment analysis
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
         self.tokenizer = AutoTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
         self.sentiment_model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
 
@@ -189,7 +193,7 @@ class BertModels:
 
         #NOTE: can also implement find topics
 
-    def reduce_topics(self, nr_topics=5):
+    def reduce_topics(self, nr_topics=10):
 
         if self.model==None:
             raise Exception('No model')
