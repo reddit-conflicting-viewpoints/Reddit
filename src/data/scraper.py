@@ -87,6 +87,7 @@ class AsyncRedditScraper:
             for post in posts:
                 posts_retrieved.append([post.id,
                                         post.title,
+                                        post.link_flair_text,
                                         post.score,
                                         post.upvote_ratio,
                                         post.subreddit,
@@ -120,7 +121,7 @@ class AsyncRedditScraper:
                                                comment.created_utc])
                     
         posts_df = pd.DataFrame(posts_retrieved,
-                                columns=['post_id', 'title', 'score', 'upvote_ratio', 'subreddit',' url',
+                                columns=['post_id', 'title', 'flair', 'score', 'upvote_ratio', 'subreddit',' url',
                                          'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
                                    columns=['post_id', 'comment_id', 'parent_id', 'comment',
