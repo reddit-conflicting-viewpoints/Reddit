@@ -31,20 +31,20 @@ nltk.download('omw-1.4')
 class BertModels:
     """
     BERT topic modeling and sentiment analysis pipeline class
-
-    Notes:
-
-
-    Functions:
-
+    
+    TODO: save_model function
 
         DELETE:fill_na: performs on the column itself
-
     """
 
 
     def __init__(self, subreddit='Music', sort_type='hot'):
+        """
+        BertModels object constructor
 
+        :param subreddit: name of subreddit that succeeds 'r/'
+        :param sort_type: order of submission sorting: 'hot' or 'new' 
+        """
         #for sentiment analysis
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -61,6 +61,14 @@ class BertModels:
         self.topic_probs = None
 
     def eda(self, tdf, pre='body'):
+        """
+        Performs Exploratory Data Analysis (EDA) on Reddit Submissions DataFrame.
+            Displays a set of visualizations that provide a snapshot of the data.
+            Total number of words, size of vocabulary, max entry length, frequency distribution of words per entry.
+        
+        :param tdf: DataFrame for EDA
+        :param pre: column name to apply EDA
+        """
 
         df = tdf.copy()
         prep = PreProcess()
@@ -131,6 +139,8 @@ class BertModels:
 
         print('Lemmatization')
         prep.lemm(df, col)
+        
+        print('********DONE: Preprocessing for Topic Modeling*********')
         return df
 
     def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
