@@ -211,6 +211,7 @@ class BertModels:
 
 
     def save_topic_model(self):
+        
         pass
 
     def sentiment_preprocess(self, df, col):
