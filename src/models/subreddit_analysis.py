@@ -77,7 +77,7 @@ class SubredditAnalysis:
         
         #7. getting relevance score
         print('********Relevance Scores*********')
-        relevance = Relevance()
+        relevance = Relevance('title-body')
         self.data = self.bert_posts.merge(self.bert_comments, left_on='post_id', right_on='post_id', how='left')
         relevance.generate_relevance(self.data)
         self.res_df = relevance.df
