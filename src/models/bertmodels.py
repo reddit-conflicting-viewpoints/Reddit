@@ -259,7 +259,8 @@ class BertModels:
             result = self.sentiment_model(tokens)
             return int(torch.argmax(result.logits))+1
 
-        df['sentiment'] = df['body'].apply(lambda x: sentiment_score(x[:512]))
+        df['sentiment'] = df[col].apply(lambda x: sentiment_score(x[:512]))
+        print('********DONE: Sentiment Analysis*********')
         return df
 
     def sentiment_viz(self, df):
