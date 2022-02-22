@@ -1,34 +1,10 @@
-from pages import page1, page2
-
-
-# app = Dash(__name__, suppress_callback_exceptions=True)
-# server = app.server
-
-# app.layout = html.Div([
-#     dcc.Location(id='url', refresh=False),
-#     html.Div(id='page-content')
-# ])
-
-
-# @callback(Output('page-content', 'children'),
-#               Input('url', 'pathname'))
-# def display_page(pathname):
-#     if pathname == '/page1':
-#         return page1.layout
-#     elif pathname == '/page2':
-#         return page2.layout
-#     else:
-#         return '404'
-
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
-
 # Code source: https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.express as px
+from pages import page1, page2
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
@@ -86,18 +62,16 @@ app.layout = html.Div([
 )
 def render_page_content(pathname):
     if pathname == "/":
-        return [
-                html.H1('Welcome to BEReddiT',
-                        style={'textAlign':'center'})
-                ]
+        # Can add more items to the list, for more content in homepage.
+        return [html.H1('Welcome to BEReddiT',style={'textAlign':'center'})]
     elif pathname == "/page1":
         return page1.layout
     elif pathname == "/page2":
         return page2.layout
     # If the user tries to reach a different page, return a 404 message
-    return "404: Not found"
+    return html.H1('404: Page Not Found', style={'textAlign':'center'})
 
 
 if __name__=='__main__':
-    # app.run_server(debug=True)
-    app.run_server(debug=False)
+    app.run_server(debug=True)
+    # app.run_server(debug=False)
