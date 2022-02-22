@@ -29,6 +29,7 @@ beautifulsoup4
 contractions
 scikit-learn
 flask
+flask_bootstrap
 dash
 
 ### If hdbscan fails to install on conda environment, run 'conda install -c conda-forge hdbscan' instead
