@@ -20,6 +20,8 @@ import re
 import contractions
 from pprint import pprint
 
+import os
+
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
@@ -29,21 +31,23 @@ nltk.download('omw-1.4')
 class BertModels:
     """
     BERT topic modeling and sentiment analysis pipeline class
-
-    Notes:
-
-
-    Functions:
-
+    
+    TODO: save_model function
 
         DELETE:fill_na: performs on the column itself
-
     """
 
 
     def __init__(self, subreddit='Music', sort_type='hot'):
+        """
+        BertModels object constructor
 
+        :param subreddit: name of subreddit that succeeds 'r/'
+        :param sort_type: order of submission sorting: 'hot' or 'new' 
+        """
         #for sentiment analysis
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
         self.tokenizer = AutoTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
         self.sentiment_model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
 
@@ -57,6 +61,14 @@ class BertModels:
         self.topic_probs = None
 
     def eda(self, tdf, pre='body'):
+        """
+        Performs Exploratory Data Analysis (EDA) on Reddit Submissions DataFrame.
+            Displays a set of visualizations that provide a snapshot of the data.
+            Total number of words, size of vocabulary, max entry length, frequency distribution of words per entry.
+        
+        :param tdf: DataFrame for EDA
+        :param pre: column name to apply EDA
+        """
 
         df = tdf.copy()
         prep = PreProcess()
@@ -93,6 +105,12 @@ class BertModels:
         plt.show()
 
     def topic_preprocess(self, df, col):
+        """
+        Preprocess DataFrame and make ready for BERTopic modeling. 
+        
+        :param df: DataFrame with subreddit data to be processed
+        :param col: column name to be processed
+        """
 
         print('********Preprocessing DataFrame for Topic Modeling*********')
         prep = PreProcess()
@@ -127,10 +145,20 @@ class BertModels:
 
         print('Lemmatization')
         prep.lemm(df, col)
+        
+        print('********DONE: Preprocessing for Topic Modeling*********')
         return df
 
     def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
-
+        """
+        Topic Modeling performed using BERTopic.
+        
+        :param df: Processed DataFrame ready for topic modeling
+        :param col: Column to be processed
+        :param calculate_probabilities:  
+            
+        """
+        
         try:
             df['body_string'] = df[col].apply(lambda x: ' '.join(map(str, x)))
             body_df = df.reset_index()
@@ -189,7 +217,7 @@ class BertModels:
 
         #NOTE: can also implement find topics
 
-    def reduce_topics(self, nr_topics=5):
+    def reduce_topics(self, nr_topics=10):
 
         if self.model==None:
             raise Exception('No model')
@@ -207,6 +235,7 @@ class BertModels:
 
 
     def save_topic_model(self):
+        
         pass
 
     def sentiment_preprocess(self, df, col):
@@ -244,7 +273,8 @@ class BertModels:
             result = self.sentiment_model(tokens)
             return int(torch.argmax(result.logits))+1
 
-        df['sentiment'] = df['body'].apply(lambda x: sentiment_score(x[:512]))
+        df['sentiment'] = df[col].apply(lambda x: sentiment_score(x[:512]))
+        print('********DONE: Sentiment Analysis*********')
         return df
 
     def sentiment_viz(self, df):
