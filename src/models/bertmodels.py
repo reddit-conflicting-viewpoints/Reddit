@@ -105,6 +105,12 @@ class BertModels:
         plt.show()
 
     def topic_preprocess(self, df, col):
+        """
+        Preprocess DataFrame and make ready for BERTopic modeling. 
+        
+        :param df: DataFrame with subreddit data to be processed
+        :param col: column name to be processed
+        """
 
         print('********Preprocessing DataFrame for Topic Modeling*********')
         prep = PreProcess()
@@ -144,7 +150,15 @@ class BertModels:
         return df
 
     def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
-
+        """
+        Topic Modeling performed using BERTopic.
+        
+        :param df: Processed DataFrame ready for topic modeling
+        :param col: Column to be processed
+        :param calculate_probabilities:  
+            
+        """
+        
         try:
             df['body_string'] = df[col].apply(lambda x: ' '.join(map(str, x)))
             body_df = df.reset_index()
