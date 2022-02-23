@@ -1,6 +1,7 @@
 from src.models.relevance_old import Relevance
 from src.models.bertmodels import BertModels
 import pandas as pd
+from src.utils import get_project_root
 
 
 class SubredditAnalysis:
@@ -8,12 +9,12 @@ class SubredditAnalysis:
     def __init__(self, subreddit='computerscience', sort_order='hot', set_num_posts=500, set_num_comments=500):
         """
         Subreddit Analysis constructor
-        
+
         3 DataFrames:
             - Subreddit Data
             - Post Data
             - Comment Data
-        
+
         Running static functions(?):
             Preprocess Posts data
             Preprocess Comments data
@@ -22,12 +23,15 @@ class SubredditAnalysis:
             Get Sentiment Score for posts and comments
             Get Relevance Score for posts->subreddit and comments->posts
                 Add scores to respective dataframes
-            
+
         :param subreddit: name of subreddit for analysis
         :param sort_order: order of submissions retrieved from reddit
         :param set_num_posts: set max number of posts for analysis
         :param set_num_comments: set max number of comments for analysis
         """
+
+        self.subreddit = subreddit
+        self.sort_order = sort_order
 
         bertmodels_obj = BertModels(subreddit=subreddit, sort_type=sort_order)
 
@@ -80,7 +84,7 @@ class SubredditAnalysis:
         relevance.generate_relevance(self.data)
         self.res_df = relevance.df
         print('********DONE: Relevance Scores*********')
-        # relevance.save_to_file(file_name='relevance_1.csv')
+        self.clean_res_df()
 
     def get_posts_data(self):
         return self.posts_df
@@ -96,3 +100,24 @@ class SubredditAnalysis:
 
     def get_result_df(self):
         return self.res_df
+
+    def save_to_file(self, path: str = 'data/results'):
+        """
+        Saves the output relevance file to a csv. Must run the generate_relevance function beforehand.
+
+        :param path: The folder path to save the file in.
+        """
+        file_name = f'{self.subreddit}_{self.sort_order}_results.csv'
+        if self.res_df is not None:
+            p = get_project_root().joinpath(path)
+            p.mkdir(parents=True, exist_ok=True)
+            self.res_df.to_csv(p.joinpath(file_name), index=False)
+        else:
+            raise Exception("Missing res_df. Error occured running pipeline.")
+
+    def clean_res_df(self):
+        """
+        Function used to clean up the columns of the res_df
+        """
+        # TODO: Finish this function
+        # self.res_df['index_x'] = ...
