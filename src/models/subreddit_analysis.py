@@ -121,3 +121,12 @@ class SubredditAnalysis:
         """
         # TODO: Finish this function
         # self.res_df['index_x'] = ...
+        self.res_df.columns =  ['post_index', 'post_id', 'post_title', 'post_score', 'post_upvote_ratio', 'subreddit', 
+                               'post_url', 'num_comments', 'post_body', 'post_created', 'post_body_word_token',
+                               'post_body_tag', 'post_body_string', 'post_topics', 'post_sentiment', 'comment_index',
+                               'comment_id', 'parent_id', 'comment', 'comment_up_vote_count',
+                               'comment_down_vote_count', 'comment_controversiality', 'comment_total_awards_received',
+                               'comment_score', 'comment_is_locked', 'comment_is_collapsed', 'comment_is_submitter', 'comment_created_utc',
+                               'comment_word_token', 'comment_tag', 'comment_body_string', 'comment_topics',
+                               'comment_sentiment', 'comment_relevance']
+        
