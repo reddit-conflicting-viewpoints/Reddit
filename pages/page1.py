@@ -1,5 +1,5 @@
 from dash import dcc, html, Input, Output, callback
-from src.visualization.visualize import *
+from pages.visualize import *
 import pandas as pd
 
 df = pd.read_csv('data/results/computerscience_hot_results.csv')
@@ -12,7 +12,7 @@ layout = html.Div([
     ),
     html.Div(id='page-1-display-value'),
     dcc.Link('Go to Page 2', href='/page2'),
-    dcc.Graph(id='indicator-graphic', figure=plot('scatter', df, x_col='relevance', y_col='score_y', title='Computer Science', threshold_col='relevance', threshold_min=0.5, threshold_max=1, color='controversiality'))
+    dcc.Graph(id='indicator-graphic', figure=plot('scatter', df, x_col='comment_relevance', y_col='comment_score', title='Computer Science', threshold_col='comment_relevance', threshold_min=0.5, threshold_max=1, color='comment_controversiality'))
 ])
 
 # @callback(

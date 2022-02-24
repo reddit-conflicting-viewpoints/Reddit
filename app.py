@@ -9,6 +9,8 @@ from pages import page1, page2
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
+server = app.server
+
 # styling the sidebar
 SIDEBAR_STYLE = {
     "position": "fixed",
