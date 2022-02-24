@@ -1,5 +1,5 @@
 from dash import dcc, html, Input, Output, callback
-from src.visualization.visualize import *
+from pages.visualize import *
 import pandas as pd
 
 df = pd.read_csv('data/results/computerscience_hot_results.csv')
