@@ -10,9 +10,6 @@ numpy
 matplotlib
 pandas
 wordcloud
-requests 
-beautifulsoup4
-contractions
-scikit-learn
 dash
 dash-bootstrap-components
+gunicorn
