@@ -13,17 +13,6 @@ numpy
 matplotlib
 pandas
 wordcloud
-nltk
-gensim
-spacy
-vaderSentiment
-hdbscan
-bertopic
-ipywidgets
-torch
-torchvision
-torchaudio
-transformers 
 requests 
 beautifulsoup4
 contractions
