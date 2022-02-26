@@ -6,7 +6,7 @@ from src.utils import get_project_root
 
 class SubredditAnalysis:
 
-    def __init__(self, subreddit='computerscience', sort_order='hot', set_num_posts=500, set_num_comments=500):
+    def __init__(self, subreddit='computerscience', sort_order='hot', set_num_posts=1000, set_num_comments=20000):
         """
         Subreddit Analysis constructor
 
