@@ -49,6 +49,7 @@ class SubredditAnalysis:
         bertmodels_obj.topic_modeling(topic_prep_posts, 'body_word_token', visualize=False)
         topic_prep_posts['topics'] = topic_extractor(bertmodels_obj.model.get_topic_info(), bertmodels_obj.topics)
         self.bert_posts = topic_prep_posts.copy()
+        bertmodels_obj.save_topic_model()
         print('********DONE: Topic Modeling for Posts*********')
 
         # 3. sentiment analysis for posts
@@ -68,6 +69,7 @@ class SubredditAnalysis:
         bertmodels_obj.topic_modeling(topic_prep_comments, 'comment_word_token', visualize=False)
         topic_prep_comments['topics'] = topic_extractor(bertmodels_obj.model.get_topic_info(), bertmodels_obj.topics)
         self.bert_comments = topic_prep_comments.copy()
+        bertmodels_obj.save_topic_model(post=False)
         print('********DONE: Topic Modeling for Comments*********')
 
         # 6. sentiment analysis for comments
@@ -85,6 +87,7 @@ class SubredditAnalysis:
         self.res_df = relevance.df
         print('********DONE: Relevance Scores*********')
         self.clean_res_df()
+        self.save_to_file()
 
     def get_posts_data(self):
         return self.posts_df
