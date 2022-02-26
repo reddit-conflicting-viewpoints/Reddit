@@ -89,7 +89,7 @@ class AsyncRedditScraper:
             comment_count = 0
             iteration_count = 0
             for comment_forest in comment_forests:
-                top_comments = comment_forest.list()[::-1]
+                top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
                 comment_count += len(top_comments)
                 iteration_count += 1
                 while top_comments:
@@ -145,7 +145,7 @@ class AsyncRedditScraper:
         }
 
         logger.info(f'start scraping top {self.config.max_post_count} {scrape_order_str[self.config.scrape_order]} posts with '
-                    f'{self.config.max_comment_count} comments per post from the following subreddits: '
+                    f'{self.config.max_comment_per_post} comments per post and {self.config.max_comment_count} total comments from the following subreddits: '
                     f'{", ".join(self.config.subreddit_list)}')
         try:
             self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
