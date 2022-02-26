@@ -52,6 +52,7 @@ class BertModels:
         self.sentiment_model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
 
         self.data = None
+        self.subreddit = subreddit
         p = get_project_root().joinpath('data/raw')
         self.posts_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_posts.csv'))
         self.comments_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_comments.csv'))
@@ -235,8 +236,12 @@ class BertModels:
 
 
     def save_topic_model(self):
+        self.model.save('./bertopic-model-{}'.format(self.subreddit))
         
-        pass
+    def load_topic_model(self, path):
+        # path = './bertopic-model-{subreddit}'
+        return BERTopic.load(path)
+        
 
     def sentiment_preprocess(self, df, col):
 
