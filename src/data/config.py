@@ -14,5 +14,5 @@ class ScraperConfig:
 default_config = scraper_config = ScraperConfig(
     subreddit_list=['computerscience'],
     scrape_order='hot',
-    max_post_count=100000000000,
-    max_comment_count=90000000000000000)
+    max_post_count=1000,
+    max_comment_count=10000)
