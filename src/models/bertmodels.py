@@ -236,11 +236,17 @@ class BertModels:
 
 
     def save_topic_model(self):
-        self.model.save('./bertopic-model-{}'.format(self.subreddit))
+        p = get_project_root().joinpath('models')
+        p.mkdir(parents=True, exist_ok=True)
+        self.model.save(p.joinpath(f'bertopic-model-{self.subreddit}'))
         
-    def load_topic_model(self, path):
-        # path = './bertopic-model-{subreddit}'
-        return BERTopic.load(path)
+    @staticmethod
+    def load_topic_model(subreddit):
+        try:
+            p = get_project_root().joinpath('models').joinpath(f'bertopic-model-{subreddit}')
+            return BERTopic.load(p)
+        except Exception:
+            print("Model was not found!")
         
 
     def sentiment_preprocess(self, df, col):
