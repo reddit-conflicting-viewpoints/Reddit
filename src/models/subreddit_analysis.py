@@ -107,11 +107,15 @@ class SubredditAnalysis:
 
         :param path: The folder path to save the file in.
         """
-        file_name = f'{self.subreddit}_{self.sort_order}_results.csv'
+        post_file_name = f'{self.subreddit}_{self.sort_order}_posts.csv'
+        comments_file_name = f'{self.subreddit}_{self.sort_order}_comments.csv'
+        result_file_name = f'{self.subreddit}_{self.sort_order}_results.csv'
         if self.res_df is not None:
             p = get_project_root().joinpath(path)
             p.mkdir(parents=True, exist_ok=True)
-            self.res_df.to_csv(p.joinpath(file_name), index=False)
+            self.bert_posts.to_csv(p.joinpath(post_file_name), index=False)
+            self.bert_comments.to_csv(p.joinpath(comments_file_name), index=False)
+            self.res_df.to_csv(p.joinpath(result_file_name), index=False)
         else:
             raise Exception("Missing res_df. Error occured running pipeline.")
 
