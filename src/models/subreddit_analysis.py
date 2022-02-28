@@ -119,31 +119,14 @@ class SubredditAnalysis:
         """
         Function used to clean up the columns of the res_df
         """
-        self.res_df.rename(columns={
-            "index_x": "post_index", 
-            "title": "post_title",
-            "score_x": "post_score",
-            "upvote_ratio": "post_upvote_ratio",
-            " url": "post_url",
-            "body": "post_body",
-            "created": "post_created",
-            'body_word_token': 'post_body_word_token',
-            'body_tag': 'post_body_tag',
-            'body_string_x': 'post_body_string',
-            'topics_x': 'post_topics',
-            'sentiment_x': 'post_sentiment',
-            'index_y': 'comment_index',
-            'up_vote_count': 'comment_up_vote_count',
-            'down_vote_count': 'comment_down_vote_count',
-            'controversiality': 'comment_controversiality',
-            'total_awards_received': 'comment_total_awards_received',
-            'score_y': 'comment_score',
-            'is_locked': 'comment_is_locked',
-            'is_collapsed': 'comment_is_collapsed',
-            'is_submitter': 'comment_is_submitter',
-            'created_utc': 'comment_created',
-            'body_string_y': 'comment_body_string',
-            'topics_y': 'comment_topics',
-            'sentiment_y': 'comment_sentiment',
-            'relevance': 'comment_relevance'
-        }, inplace=True)
+        # TODO: Finish this function
+        # self.res_df['index_x'] = ...
+        self.res_df.columns =  ['post_index', 'post_id', 'post_title', 'post_score', 'post_upvote_ratio', 'subreddit', 
+                               'post_url', 'num_comments', 'post_body', 'post_created', 'post_body_word_token',
+                               'post_body_tag', 'post_body_string', 'post_topics', 'post_sentiment', 'comment_index',
+                               'comment_id', 'parent_id', 'comment', 'comment_up_vote_count',
+                               'comment_down_vote_count', 'comment_controversiality', 'comment_total_awards_received',
+                               'comment_score', 'comment_is_locked', 'comment_is_collapsed', 'comment_is_submitter', 'comment_created_utc',
+                               'comment_word_token', 'comment_tag', 'comment_body_string', 'comment_topics',
+                               'comment_sentiment', 'comment_relevance']
+        
