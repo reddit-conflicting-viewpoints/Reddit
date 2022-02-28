@@ -6,7 +6,7 @@ from src.utils import get_project_root
 
 class SubredditAnalysis:
 
-    def __init__(self, subreddit='computerscience', sort_order='hot', set_num_posts=500, set_num_comments=500):
+    def __init__(self, subreddit='computerscience', sort_order='hot', set_num_posts=1000, set_num_comments=20000):
         """
         Subreddit Analysis constructor
 
@@ -107,11 +107,15 @@ class SubredditAnalysis:
 
         :param path: The folder path to save the file in.
         """
-        file_name = f'{self.subreddit}_{self.sort_order}_results.csv'
+        post_file_name = f'{self.subreddit}_{self.sort_order}_posts.csv'
+        comments_file_name = f'{self.subreddit}_{self.sort_order}_comments.csv'
+        result_file_name = f'{self.subreddit}_{self.sort_order}_results.csv'
         if self.res_df is not None:
             p = get_project_root().joinpath(path)
             p.mkdir(parents=True, exist_ok=True)
-            self.res_df.to_csv(p.joinpath(file_name), index=False)
+            self.bert_posts.to_csv(p.joinpath(post_file_name), index=False)
+            self.bert_comments.to_csv(p.joinpath(comments_file_name), index=False)
+            self.res_df.to_csv(p.joinpath(result_file_name), index=False)
         else:
             raise Exception("Missing res_df. Error occured running pipeline.")
 

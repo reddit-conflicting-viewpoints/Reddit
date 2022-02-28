@@ -84,24 +84,14 @@ class AsyncRedditScraper:
                      scrape_order[self.config.scrape_order](limit=self.config.max_post_count)
                      if not post.stickied]
 
-            for post in posts:
-                posts_retrieved.append([post.id,
-                                        post.title,
-                                        post.link_flair_text,
-                                        post.score,
-                                        post.upvote_ratio,
-                                        post.subreddit,
-                                        post.url,
-                                        post.num_comments,
-                                        post.selftext,
-                                        post.created])
-
-            
             comment_forests = await asyncio.gather(*[post.comments() for post in posts])
             await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
-            # in place
+            comment_count = 0
+            iteration_count = 0
             for comment_forest in comment_forests:
-                top_comments = comment_forest.list()[:self.config.max_comment_count][::-1]
+                top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
+                comment_count += len(top_comments)
+                iteration_count += 1
                 while top_comments:
                     comment = top_comments.pop()
                     if comment.stickied:
@@ -119,7 +109,21 @@ class AsyncRedditScraper:
                                                comment.collapsed,
                                                comment.is_submitter,
                                                comment.created_utc])
-                    
+                if comment_count > self.config.max_comment_count:
+                    break
+
+            for post in posts[:iteration_count]:
+                posts_retrieved.append([post.id,
+                                        post.title,
+                                        post.link_flair_text,
+                                        post.score,
+                                        post.upvote_ratio,
+                                        post.subreddit,
+                                        post.url,
+                                        post.num_comments,
+                                        post.selftext,
+                                        post.created])
+
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'flair', 'score', 'upvote_ratio', 'subreddit', ' url',
                                          'num_comments', 'body', 'created'])
@@ -141,7 +145,7 @@ class AsyncRedditScraper:
         }
 
         logger.info(f'start scraping top {self.config.max_post_count} {scrape_order_str[self.config.scrape_order]} posts with '
-                    f'{self.config.max_comment_count} comments per post from the following subreddits: '
+                    f'{self.config.max_comment_per_post} comments per post and {self.config.max_comment_count} total comments from the following subreddits: '
                     f'{", ".join(self.config.subreddit_list)}')
         try:
             self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
