@@ -235,15 +235,21 @@ class BertModels:
         fig.show()
 
 
-    def save_topic_model(self):
+    def save_topic_model(self, post=True):
         p = get_project_root().joinpath('models')
         p.mkdir(parents=True, exist_ok=True)
-        self.model.save(p.joinpath(f'bertopic-model-{self.subreddit}'))
+        if post:
+            self.model.save(p.joinpath(f'bertopic-model-posts-{self.subreddit}'))
+        else:
+            self.model.save(p.joinpath(f'bertopic-model-comments-{self.subreddit}'))
         
     @staticmethod
-    def load_topic_model(subreddit):
+    def load_topic_model(subreddit, post=True):
         try:
-            p = get_project_root().joinpath('models').joinpath(f'bertopic-model-{subreddit}')
+            if post:
+                p = get_project_root().joinpath('models').joinpath(f'bertopic-model-posts-{subreddit}')
+            else:
+                p = get_project_root().joinpath('models').joinpath(f'bertopic-model-comments-{subreddit}')
             return BERTopic.load(p)
         except Exception:
             print("Model was not found!")
