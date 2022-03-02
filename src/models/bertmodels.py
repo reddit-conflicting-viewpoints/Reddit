@@ -257,7 +257,6 @@ class BertModels:
 
     def sentiment_preprocess(self, df, col):
 
-        print('********Preprocessing DataFrame for Sentiment Analysis*********')
         df[col] = df[col].astype(str)
         df = df[df[col] != 'nan']
         df = df.reset_index()
@@ -281,7 +280,6 @@ class BertModels:
 
     def sentiment_analysis(self, df, col):
 
-        print('********Sentiment Analysis*********')
         def sentiment_score(post):
             '''
             For sentiment scoring of posts.
@@ -291,7 +289,6 @@ class BertModels:
             return int(torch.argmax(result.logits))+1
 
         df['sentiment'] = df[col].apply(lambda x: sentiment_score(x[:512]))
-        print('********DONE: Sentiment Analysis*********')
         return df
 
     def sentiment_viz(self, df):
