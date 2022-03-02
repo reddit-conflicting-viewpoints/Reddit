@@ -112,13 +112,14 @@ class BertModels:
         :param df: DataFrame with subreddit data to be processed
         :param col: column name to be processed
         """
-
-        print('********Preprocessing DataFrame for Topic Modeling*********')
         prep = PreProcess()
 
+        print('Num rows: ',df.shape)
+        temp = df.shape[0]
         df[col] = df[col].astype(str)
         df = df[df[col] != 'nan']
         df = df.reset_index()
+        print('Num rows removed: ', temp - df.shape[0])
 
         print('Fill NaNs')
         prep.fill_na(df, col)
@@ -147,7 +148,6 @@ class BertModels:
         print('Lemmatization')
         prep.lemm(df, col)
         
-        print('********DONE: Preprocessing for Topic Modeling*********')
         return df
 
     def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
