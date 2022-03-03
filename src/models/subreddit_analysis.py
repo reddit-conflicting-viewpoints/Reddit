@@ -47,7 +47,7 @@ class SubredditAnalysis:
             col_for_analysis = 'title'
         else:
             col_for_analysis = 'body'
-        
+
         topic_prep_posts = bertmodels_obj.topic_preprocess(self.posts_df, col_for_analysis)
         print('********DONE: Preprocessing Posts for Topic Modeling*********')
 
@@ -58,7 +58,7 @@ class SubredditAnalysis:
         self.bert_posts = topic_prep_posts.copy()
         bertmodels_obj.save_topic_model()
         print('********DONE: Topic Modeling for Posts*********')
-        
+
         # 2a. reduce topics to less than 10 for posts 
         print('********2a. Reduce Topics for Posts (<10)*********')
         bertmodels_obj.reduce_topics(nr_topics=10)
@@ -87,7 +87,7 @@ class SubredditAnalysis:
         self.bert_comments = topic_prep_comments.copy()
         bertmodels_obj.save_topic_model(post=False)
         print('********DONE: Topic Modeling for Comments*********')
-        
+
         # 5a. reduce topics to less than 15 for comments
         print('********5a. Reduce Topics for Comments (<15)*********')
         bertmodels_obj.reduce_topics(nr_topics=15)
@@ -110,7 +110,7 @@ class SubredditAnalysis:
         relevance.generate_relevance(self.data)
         self.res_df = relevance.df
         print('********DONE: Relevance Scores*********')
-        
+
         # 8. Cleaning column names and saving results dataframe to file.
         print('********8. Cleaning and Saving Results to File*********')
         self.clean_res_df()
@@ -154,33 +154,31 @@ class SubredditAnalysis:
         """
         Function used to clean up the columns of the res_df
         """
-        # TODO: Finish this function
-        # self.res_df['index_x'] = ...
         self.res_df.rename(columns={
-                    "index_x": "post_index", 
-                    "title": "post_title",
-                    "score_x": "post_score",
-                    "upvote_ratio": "post_upvote_ratio",
-                    " url": "post_url",
-                    "body": "post_body",
-                    "created": "post_created",
-                    'body_word_token': 'post_body_word_token',
-                    'body_tag': 'post_body_tag',
-                    'body_string_x': 'post_body_string',
-                    'topics_x': 'post_topics',
-                    'sentiment_x': 'post_sentiment',
-                    'index_y': 'comment_index',
-                    'up_vote_count': 'comment_up_vote_count',
-                    'down_vote_count': 'comment_down_vote_count',
-                    'controversiality': 'comment_controversiality',
-                    'total_awards_received': 'comment_total_awards_received',
-                    'score_y': 'comment_score',
-                    'is_locked': 'comment_is_locked',
-                    'is_collapsed': 'comment_is_collapsed',
-                    'is_submitter': 'comment_is_submitter',
-                    'created_utc': 'comment_created',
-                    'body_string_y': 'comment_body_string',
-                    'topics_y': 'comment_topics',
-                    'sentiment_y': 'comment_sentiment',
-                    'relevance': 'comment_relevance'
-                }, inplace=True)
+            "index_x": "post_index", 
+            "title": "post_title",
+            "score_x": "post_score",
+            "upvote_ratio": "post_upvote_ratio",
+            " url": "post_url",
+            "body": "post_body",
+            "created": "post_created",
+            'body_word_token': 'post_body_word_token',
+            'body_tag': 'post_body_tag',
+            'body_string_x': 'post_body_string',
+            'topics_x': 'post_topics',
+            'sentiment_x': 'post_sentiment',
+            'index_y': 'comment_index',
+            'up_vote_count': 'comment_up_vote_count',
+            'down_vote_count': 'comment_down_vote_count',
+            'controversiality': 'comment_controversiality',
+            'total_awards_received': 'comment_total_awards_received',
+            'score_y': 'comment_score',
+            'is_locked': 'comment_is_locked',
+            'is_collapsed': 'comment_is_collapsed',
+            'is_submitter': 'comment_is_submitter',
+            'created_utc': 'comment_created',
+            'body_string_y': 'comment_body_string',
+            'topics_y': 'comment_topics',
+            'sentiment_y': 'comment_sentiment',
+            'relevance': 'comment_relevance'
+        }, inplace=True)
