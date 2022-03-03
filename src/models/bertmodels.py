@@ -114,7 +114,7 @@ class BertModels:
         """
         prep = PreProcess()
 
-        print('Num rows: ',df.shape)
+        print('Num rows: ', df.shape)
         temp = df.shape[0]
         df[col] = df[col].astype(str)
         df = df[df[col] != 'nan']
@@ -230,8 +230,8 @@ class BertModels:
         self.model.update_topics(self.docs, self.topics, n_gram_range=(1, 3))
 
         print('Reduced topic distributions:')
-        fig = self.model.visualize_barchart(top_n_topics=10)
-        fig.show()
+        # fig = self.model.visualize_barchart(top_n_topics=10)
+        # fig.show()
 
     def save_topic_model(self, post=True):
         p = get_project_root().joinpath('models')
