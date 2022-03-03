@@ -4,6 +4,7 @@ import logging
 import asyncio
 import asyncpraw
 import pandas as pd
+import numpy as np
 from dataclasses import dataclass, field
 from typing import List
 from src.utils import get_project_root
@@ -88,50 +89,92 @@ class AsyncRedditScraper:
             await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
             comment_count = 0
             iteration_count = 0
-            for comment_forest in comment_forests:
-                top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
-                comment_count += len(top_comments)
-                iteration_count += 1
-                while top_comments:
-                    comment = top_comments.pop()
-                    if comment.stickied:
-                        continue
-                    comments_retrieved.append([comment.submission.id,
-                                               comment.id,
-                                               comment.parent_id,
-                                               comment.body,
-                                               comment.ups,
-                                               comment.downs,
-                                               comment.controversiality,
-                                               comment.total_awards_received,
-                                               comment.score,
-                                               comment.locked,
-                                               comment.collapsed,
-                                               comment.is_submitter,
-                                               comment.created_utc])
-                if comment_count > self.config.max_comment_count:
-                    break
+            try:
+                for comment_forest in comment_forests:
+                    top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
+                    comment_count += len(top_comments)
+                    iteration_count += 1
+                    while top_comments:
+                        comment = top_comments.pop()
+                        if comment.stickied:
+                            continue
+                        comments_retrieved.append([comment.submission.id,
+                                                   comment.id,
+                                                   comment.parent_id,
+                                                   # comment_author.id,
+                                                   comment.body,
+                                                   comment.ups,
+                                                   # comment.downs,
+                                                   # comment.ups / (comment.ups + comment.downs),
+                                                   comment.controversiality,
+                                                   comment.total_awards_received,
+                                                   comment.locked,
+                                                   comment.collapsed,
+                                                   comment.is_submitter,
+                                                   comment.created_utc])
+                    if comment_count > self.config.max_comment_count:
+                        break
+            except Exception as e:
+                print(e)
 
-            for post in posts[:iteration_count]:
-                posts_retrieved.append([post.id,
-                                        post.title,
-                                        post.link_flair_text,
-                                        post.score,
-                                        post.upvote_ratio,
-                                        post.subreddit,
-                                        post.url,
-                                        post.num_comments,
-                                        post.selftext,
-                                        post.created])
+            try:
+                for post in posts[:iteration_count]:
+                    # reddit_user = post.author
+                    # await reddit_user.load()
+                    posts_retrieved.append([post.id,
+                                            # reddit_user.id,
+                                            post.title,
+                                            post.link_flair_text,
+                                            post.score,
+                                            post.upvote_ratio,
+                                            post.subreddit,
+                                            post.url,
+                                            post.num_comments,
+                                            post.selftext,
+                                            post.created])
+            except Exception as e:
+                print(e)
 
+        # posts_df = pd.DataFrame(posts_retrieved,
+        #                         columns=['post_id', 'post_user_id', 'title', 'flair', 'score', 'post_upvote_ratio',
+        #                                  'subreddit', 'url', 'num_comments', 'body', 'created'])
+        # comments_df = pd.DataFrame(comments_retrieved,
+        #                            columns=['post_id', 'comment_id', 'parent_id', 'comment_user_id', 'comment', 
+        #                                     'up_vote_count', 'down_vote_count', 'comment_upvote_ratio', 'controversiality',
+        #                                     'total_awards_received', 'is_locked', 'is_collapsed',
+        #                                     'is_submitter', 'created_utc'])
         posts_df = pd.DataFrame(posts_retrieved,
-                                columns=['post_id', 'title', 'flair', 'score', 'upvote_ratio', 'subreddit', ' url',
-                                         'num_comments', 'body', 'created'])
+                                columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
+                                         'subreddit', 'url', 'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                   columns=['post_id', 'comment_id', 'parent_id', 'comment',
-                                            'up_vote_count', 'down_vote_count', 'controversiality',
-                                            'total_awards_received', 'score', 'is_locked', 'is_collapsed',
+                                   columns=['post_id', 'comment_id', 'parent_id', 'comment', 
+                                            'up_vote_count', 'controversiality',
+                                            'total_awards_received', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
+        # try:
+        #     comments_df['comment_upvote_ratio'] = 0
+        #     for i in range(len(comments_df)):
+        #         upvote_c = int(comments_df.iloc[i]['up_vote_count'])
+        #         downvote_c = int(comments_df.iloc[i]['down_vote_count'])
+        #         summ = upvote_c + downvote_c
+        #         if summ == 0:
+        #             comments_df.at[i, 'comment_upvote_ratio'] = np.nan
+        #         else:
+        #             comments_df.at[i, 'comment_upvote_ratio'] = np.round(upvote_c / summ, decimals=2)
+        # except Exception as e:
+        #         print(e)
+        # try:
+        #     posts_df['post_upvote_ratio'] = 0
+        #     for i in range(len(posts_df)):
+        #         upvote_c = int(posts_df.iloc[i]['score'])
+        #         downvote_c = int(posts_df.iloc[i]['post_down_vote_count'])
+        #         summ = upvote_c + downvote_c
+        #         if summ == 0:
+        #             posts_df.at[i, 'post_upvote_ratio'] = np.nan
+        #         else:
+        #             posts_df.at[i, 'post_upvote_ratio'] = np.round(upvote_c / summ, decimals=2)
+        # except Exception as e:
+        #         print(e)
         return SubRedditData(subreddit_name, posts_df, comments_df)
 
     @async_retry(times=3, delay=10)
