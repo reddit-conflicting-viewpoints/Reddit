@@ -28,15 +28,15 @@ nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 
+
 class BertModels:
     """
     BERT topic modeling and sentiment analysis pipeline class
-    
+
     TODO: save_model function
 
         DELETE:fill_na: performs on the column itself
     """
-
 
     def __init__(self, subreddit='Music', sort_type='hot'):
         """
@@ -45,13 +45,14 @@ class BertModels:
         :param subreddit: name of subreddit that succeeds 'r/'
         :param sort_type: order of submission sorting: 'hot' or 'new' 
         """
-        #for sentiment analysis
+        # for sentiment analysis
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
         self.tokenizer = AutoTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
         self.sentiment_model = AutoModelForSequenceClassification.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
 
         self.data = None
+        self.subreddit = subreddit
         p = get_project_root().joinpath('data/raw')
         self.posts_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_posts.csv'))
         self.comments_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_comments.csv'))
@@ -65,7 +66,7 @@ class BertModels:
         Performs Exploratory Data Analysis (EDA) on Reddit Submissions DataFrame.
             Displays a set of visualizations that provide a snapshot of the data.
             Total number of words, size of vocabulary, max entry length, frequency distribution of words per entry.
-        
+
         :param tdf: DataFrame for EDA
         :param pre: column name to apply EDA
         """
@@ -107,17 +108,18 @@ class BertModels:
     def topic_preprocess(self, df, col):
         """
         Preprocess DataFrame and make ready for BERTopic modeling. 
-        
+
         :param df: DataFrame with subreddit data to be processed
         :param col: column name to be processed
         """
-
-        print('********Preprocessing DataFrame for Topic Modeling*********')
         prep = PreProcess()
 
+        print('Num rows: ', df.shape)
+        temp = df.shape[0]
         df[col] = df[col].astype(str)
         df = df[df[col] != 'nan']
         df = df.reset_index()
+        print('Num rows removed: ', temp - df.shape[0])
 
         print('Fill NaNs')
         prep.fill_na(df, col)
@@ -146,19 +148,17 @@ class BertModels:
         print('Lemmatization')
         prep.lemm(df, col)
         
-        print('********DONE: Preprocessing for Topic Modeling*********')
         return df
 
     def topic_modeling(self, df, col='body_word_token', calculate_probabilities=True, verbose=True, visualize=True):
         """
         Topic Modeling performed using BERTopic.
-        
+
         :param df: Processed DataFrame ready for topic modeling
         :param col: Column to be processed
         :param calculate_probabilities:  
-            
         """
-        
+
         try:
             df['body_string'] = df[col].apply(lambda x: ' '.join(map(str, x)))
             body_df = df.reset_index()
@@ -230,21 +230,33 @@ class BertModels:
         self.model.update_topics(self.docs, self.topics, n_gram_range=(1, 3))
 
         print('Reduced topic distributions:')
-        fig = self.model.visualize_barchart(top_n_topics=10)
-        fig.show()
+        # fig = self.model.visualize_barchart(top_n_topics=10)
+        # fig.show()
 
+    def save_topic_model(self, post=True):
+        p = get_project_root().joinpath('models')
+        p.mkdir(parents=True, exist_ok=True)
+        if post:
+            self.model.save(p.joinpath(f'bertopic-model-posts-{self.subreddit}'))
+        else:
+            self.model.save(p.joinpath(f'bertopic-model-comments-{self.subreddit}'))
 
-    def save_topic_model(self):
-        
-        pass
+    @staticmethod
+    def load_topic_model(subreddit, post=True):
+        try:
+            if post:
+                p = get_project_root().joinpath('models').joinpath(f'bertopic-model-posts-{subreddit}')
+            else:
+                p = get_project_root().joinpath('models').joinpath(f'bertopic-model-comments-{subreddit}')
+            return BERTopic.load(p)
+        except Exception:
+            print("Model was not found!")
 
     def sentiment_preprocess(self, df, col):
 
-        print('********Preprocessing DataFrame for Sentiment Analysis*********')
         df[col] = df[col].astype(str)
         df = df[df[col] != 'nan']
         df = df.reset_index()
-
 
         prep = PreProcess()
 
@@ -264,7 +276,6 @@ class BertModels:
 
     def sentiment_analysis(self, df, col):
 
-        print('********Sentiment Analysis*********')
         def sentiment_score(post):
             '''
             For sentiment scoring of posts.
@@ -274,7 +285,6 @@ class BertModels:
             return int(torch.argmax(result.logits))+1
 
         df['sentiment'] = df[col].apply(lambda x: sentiment_score(x[:512]))
-        print('********DONE: Sentiment Analysis*********')
         return df
 
     def sentiment_viz(self, df):

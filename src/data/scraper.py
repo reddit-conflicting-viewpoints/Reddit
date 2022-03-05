@@ -4,6 +4,7 @@ import logging
 import asyncio
 import asyncpraw
 import pandas as pd
+import numpy as np
 from dataclasses import dataclass, field
 from typing import List
 from src.utils import get_project_root
@@ -84,49 +85,96 @@ class AsyncRedditScraper:
                      scrape_order[self.config.scrape_order](limit=self.config.max_post_count)
                      if not post.stickied]
 
-            for post in posts:
-                posts_retrieved.append([post.id,
-                                        post.title,
-                                        post.link_flair_text,
-                                        post.score,
-                                        post.upvote_ratio,
-                                        post.subreddit,
-                                        post.url,
-                                        post.num_comments,
-                                        post.selftext,
-                                        post.created])
-
-            
             comment_forests = await asyncio.gather(*[post.comments() for post in posts])
             await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
-            # in place
-            for comment_forest in comment_forests:
-                top_comments = comment_forest.list()[:self.config.max_comment_count][::-1]
-                while top_comments:
-                    comment = top_comments.pop()
-                    if comment.stickied:
-                        continue
-                    comments_retrieved.append([comment.submission.id,
-                                               comment.id,
-                                               comment.parent_id,
-                                               comment.body,
-                                               comment.ups,
-                                               comment.downs,
-                                               comment.controversiality,
-                                               comment.total_awards_received,
-                                               comment.score,
-                                               comment.locked,
-                                               comment.collapsed,
-                                               comment.is_submitter,
-                                               comment.created_utc])
-                    
+
+            # try:
+            #     comments = await asyncio.gather(*[comment_forest.list() for comment_forest in comment_forests])
+            #     comments = [item for sublist in comments for item in sublist[:self.config.max_comment_per_post][::-1]]
+            #     await asyncio.gather(*[comment.author() for comment in comments])
+            # except Exception as e:
+            #     print(e)
+
+            # try:
+            #     await asyncio.gather(*[comment.author.load() for comment_forest in comment_forests for comment in comment_forest.list()])
+            # except Exception as e:
+            #     print(e)
+
+            # try:
+            #     all_comments = []
+            #     for comment_forest in comment_forests:
+            #         top_comments = comment_forest.list()
+            #         while top_comments:
+            #             comment = top_comments.pop()
+            #             all_comments.append(comment)
+            #     await asyncio.gather(*[commentt.author.load() for commentt in all_comments])
+            # except Exception as e:
+            #     print(e)
+            
+            # try:
+            #     all_comments = []
+            #     for comment_forest in comment_forests:
+            #         top_comments = comment_forest.list()
+            #         while top_comments:
+            #             comment = top_comments.pop()
+            #             all_comments.append(comment)
+            #     await asyncio.gather(*[await commentt.author.load() for commentt in all_comments])
+            # except Exception as e:
+            #     print(e)
+
+            comment_count = 0
+            iteration_count = 0
+            try:
+                for comment_forest in comment_forests:
+                    top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
+                    # await asyncio.gather(*[commentt.author.load() for commentt in top_comments])
+                    comment_count += len(top_comments)
+                    iteration_count += 1
+                    while top_comments:
+                        comment = top_comments.pop()
+                        if comment.stickied:
+                            continue
+                        comments_retrieved.append([comment.submission.id,
+                                                   comment.id,
+                                                   comment.parent_id,
+                                                   # comment.author.id,
+                                                   comment.body,
+                                                   comment.ups,
+                                                   comment.controversiality,
+                                                   comment.total_awards_received,
+                                                   comment.locked,
+                                                   comment.collapsed,
+                                                   comment.is_submitter,
+                                                   comment.created_utc])
+                    if comment_count > self.config.max_comment_count:
+                        break
+            except Exception as e:
+                print(e)
+
+            # await asyncio.gather(*[post.author.load() for post in posts])
+            try:
+                for post in posts[:iteration_count]:
+                    posts_retrieved.append([post.id,
+                                            # post.author.id,
+                                            post.title,
+                                            post.link_flair_text,
+                                            post.score,
+                                            post.upvote_ratio,
+                                            post.subreddit,
+                                            post.url,
+                                            post.num_comments,
+                                            post.selftext,
+                                            post.created])
+            except Exception as e:
+                print(e)
+
         posts_df = pd.DataFrame(posts_retrieved,
-                                columns=['post_id', 'title', 'flair', 'score', 'upvote_ratio', 'subreddit', ' url',
-                                         'num_comments', 'body', 'created'])
+                                columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
+                                         'subreddit', 'url', 'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                   columns=['post_id', 'comment_id', 'parent_id', 'comment',
-                                            'up_vote_count', 'down_vote_count', 'controversiality',
-                                            'total_awards_received', 'score', 'is_locked', 'is_collapsed',
+                                   columns=['post_id', 'comment_id', 'parent_id', # 'comment_user_id',
+                                            'comment', 'up_vote_count', 'controversiality',
+                                            'total_awards_received', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
         return SubRedditData(subreddit_name, posts_df, comments_df)
 
@@ -141,7 +189,7 @@ class AsyncRedditScraper:
         }
 
         logger.info(f'start scraping top {self.config.max_post_count} {scrape_order_str[self.config.scrape_order]} posts with '
-                    f'{self.config.max_comment_count} comments per post from the following subreddits: '
+                    f'{self.config.max_comment_per_post} comments per post and {self.config.max_comment_count} total comments from the following subreddits: '
                     f'{", ".join(self.config.subreddit_list)}')
         try:
             self._data = await asyncio.gather(*(self._fetch_from_single_subreddit(subreddit_name) for
