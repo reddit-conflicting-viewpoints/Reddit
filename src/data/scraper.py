@@ -146,8 +146,8 @@ class AsyncRedditScraper:
                                                    comment.collapsed,
                                                    comment.is_submitter,
                                                    comment.created_utc])
-                        if comment_count > self.config.max_comment_count:
-                            break
+                    if comment_count > self.config.max_comment_count:
+                        break
             except Exception as e:
                 print(e)
 
