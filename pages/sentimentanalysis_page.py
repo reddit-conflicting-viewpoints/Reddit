@@ -30,8 +30,8 @@ layout = html.Div([
         ], style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
     ]),
 
-    dcc.Graph(id='indicator-graphic'),
-    
+    dcc.Loading(children=[dcc.Graph(id='indicator-graphic')], color='#119DFF', type='dot', fullscreen=True),
+
     # dcc.Slider(
     #     df['Year'].min(),
     #     df['Year'].max(),
