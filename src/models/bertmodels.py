@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pandas.errors import ParserError
 import matplotlib.pyplot as plt
 from src.utils import get_project_root
 from src.features.preprocess import PreProcess #DEPENDENCY
@@ -54,8 +55,12 @@ class BertModels:
         self.data = None
         self.subreddit = subreddit
         p = get_project_root().joinpath('data/raw')
-        self.posts_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_posts.csv'))
-        self.comments_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_comments.csv'))
+        try:
+            self.posts_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_posts.csv'))
+            self.comments_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_comments.csv'))
+        except ParserError:
+            self.posts_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_posts.csv'), lineterminator='\n')
+            self.comments_df = pd.read_csv(get_project_root().joinpath('data/raw').joinpath(f'{subreddit}_{sort_type}_comments.csv'), lineterminator='\n')
         self.model = None
         self.topics = None
         self.docs = None
