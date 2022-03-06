@@ -3,18 +3,12 @@ import plotly.express as px
 from pages.visualize import *
 import pandas as pd
 
-df = pd.read_csv('data/results/computerscience_hot_results.csv')
-
 layout = html.Div([
     html.Div([
 
         html.Div([
             html.P("X-Axis", style={'textAlign':'center'}),
-            dcc.Dropdown(
-                df.columns,
-                'post_score',
-                id='xaxis-column'
-            ),
+            dcc.Dropdown(id='xaxis-column'),
             dcc.RadioItems(
                 ['Linear', 'Log'],
                 'Linear',
@@ -25,11 +19,7 @@ layout = html.Div([
 
         html.Div([
             html.P("Y-Axis", style={'textAlign':'center'}),
-            dcc.Dropdown(
-                df.columns,
-                'post_upvote_ratio',
-                id='yaxis-column'
-            ),
+            dcc.Dropdown(id='yaxis-column'),
             dcc.RadioItems(
                 ['Linear', 'Log'],
                 'Linear',
@@ -49,17 +39,6 @@ layout = html.Div([
     #     value=df['Year'].max(),
     #     marks={str(year): str(year) for year in df['Year'].unique()},
     # )
-    
-    
-    html.H3('Page 2'),
-    dcc.Dropdown(
-        {f'Page 2 - {i}': f'{i}' for i in ['New York City', 'Montreal', 'Los Angeles']},
-        id='page-2-dropdown'
-    ),
-    html.Div(id='page-2-display-value'),
-    dcc.Link('Go to Page 1', href='/page1'),
-    dcc.Graph(id='indicator-graphic2', figure=plot('scatter', df, x_col='comment_relevance', y_col='comment_score', title='Computer Science', threshold_col='comment_relevance', threshold_min=0.5, threshold_max=1, color='comment_controversiality'))
-
 ])
 
 
@@ -68,9 +47,14 @@ layout = html.Div([
     Input('xaxis-column', 'value'),
     Input('yaxis-column', 'value'),
     Input('xaxis-type', 'value'),
-    Input('yaxis-type', 'value'))
+    Input('yaxis-type', 'value'),
+    Input('session', 'data')
+)
 def update_graph(xaxis_column_name, yaxis_column_name,
-                 xaxis_type, yaxis_type):
+                 xaxis_type, yaxis_type, data):
+    
+    subreddit = data
+    df = pd.read_csv(f'data/results/{subreddit}_hot_results.csv')
 
     fig = px.scatter(x=df[xaxis_column_name],
                      y=df[yaxis_column_name],
@@ -87,7 +71,11 @@ def update_graph(xaxis_column_name, yaxis_column_name,
     return fig
 
 @callback(
-    Output('page-2-display-value', 'children'),
-    Input('page-2-dropdown', 'value'))
-def display_value(value):
-    return f'You have selected {value}'
+    Output('xaxis-column', 'options'),
+    Output('yaxis-column', 'options'),
+    Input('session', 'data')
+)
+def update_dropdown(data):
+    subreddit = data
+    df = pd.read_csv(f'data/results/{subreddit}_hot_results.csv')
+    return list(df.columns), list(df.columns)
