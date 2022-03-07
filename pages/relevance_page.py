@@ -4,7 +4,7 @@ from pages.sas_key import get_csv_url
 import pandas as pd
 
 layout = html.Div([
-    dcc.Graph(id='first'),
+    dcc.Loading(children=[dcc.Graph(id='first')], color='#119DFF', type='dot', fullscreen=True),
 ])
 
 @callback(
