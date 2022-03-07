@@ -1,4 +1,5 @@
 from dash import dcc, html, Input, Output, callback
+from pages.sas_key import get_df
 import plotly.express as px
 from pages.visualize import *
 import pandas as pd
@@ -29,8 +30,8 @@ layout = html.Div([
         ], style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
     ]),
 
-    dcc.Graph(id='indicator-graphic'),
-    
+    dcc.Loading(children=[dcc.Graph(id='indicator-graphic')], color='#119DFF', type='dot', fullscreen=True),
+
     # dcc.Slider(
     #     df['Year'].min(),
     #     df['Year'].max(),
@@ -54,7 +55,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
                  xaxis_type, yaxis_type, data):
     
     subreddit = data
-    df = pd.read_csv(f'data/results/{subreddit}_hot_results.csv')
+    df = get_df(subreddit)
 
     fig = px.scatter(x=df[xaxis_column_name],
                      y=df[yaxis_column_name],
@@ -77,5 +78,5 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 )
 def update_dropdown(data):
     subreddit = data
-    df = pd.read_csv(f'data/results/{subreddit}_hot_results.csv')
+    df = get_df(subreddit)
     return list(df.columns), list(df.columns)
