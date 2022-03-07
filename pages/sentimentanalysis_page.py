@@ -78,5 +78,5 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 )
 def update_dropdown(data):
     subreddit = data
-    df = pd.read_csv(f'data/results/{subreddit}_hot_results.csv')
+    df = pd.read_csv(get_csv_url(subreddit))
     return list(df.columns), list(df.columns)
