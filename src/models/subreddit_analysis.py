@@ -157,7 +157,7 @@ class SubredditAnalysis:
         self.res_df.rename(columns={
             "index_x": "post_index", 
             "title": "post_title",
-            "score": "post_up_vote_count",
+            "score": "post_score",
             "upvote_ratio": "post_upvote_ratio",
             "url": "post_url",
             "body": "post_body",
