@@ -1,5 +1,5 @@
 from dash import dcc, html, Input, Output, callback
-from pages.sas_key import get_csv_url
+from pages.sas_key import get_df
 import plotly.express as px
 from pages.visualize import *
 import pandas as pd
@@ -55,7 +55,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
                  xaxis_type, yaxis_type, data):
     
     subreddit = data
-    df = pd.read_csv(get_csv_url(subreddit))
+    df = get_df(subreddit)
 
     fig = px.scatter(x=df[xaxis_column_name],
                      y=df[yaxis_column_name],
@@ -78,5 +78,5 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 )
 def update_dropdown(data):
     subreddit = data
-    df = pd.read_csv(get_csv_url(subreddit))
+    df = get_df(subreddit)
     return list(df.columns), list(df.columns)
