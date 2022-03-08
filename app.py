@@ -127,7 +127,7 @@ def render_page_content(pathname):
                                                  # fixed_rows={'headers': True},
                                                  style_header={'font-weight': 'bold'},
                                                  style_data={'whiteSpace': 'normal'},
-                                                 style_cell={'font-family':'sans-serif'},
+                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
                                                  css=[{
                                                      'selector': '.dash-spreadsheet td div',
                                                      'rule': '''
