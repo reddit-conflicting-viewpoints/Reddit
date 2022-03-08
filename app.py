@@ -117,29 +117,28 @@ def render_page_content(pathname):
                             html.P(id='subredditdescription', style=TEXT_STYLE),
                             html.H5("Subreddit Quick Facts:", style=TEXT_STYLE),
                             dash_table.DataTable(id="subredditfacts",
+                                                 style_header={'font-weight': 'bold'},
                                                  style_cell={'font-family':'sans-serif'},
                                                  style_data={'whiteSpace': 'normal', 'height': 'auto'}),
                             html.H5("Post Data Preview:", style=TEXT_STYLE),
                             
                             ### Table that cuts off text
-                            # dash_table.DataTable(id="subreddittable", page_size=5,
-                            #                      # fixed_rows={'headers': True},
-                            #                      style_data={'whiteSpace': 'normal'},
-                            #                      style_cell={'font-family':'sans-serif'},
-                            #                      css=[{
-                            #                          'selector': '.dash-spreadsheet td div',
-                            #                          'rule': '''
-                            #                              line-height: 15px;
-                            #                              max-height: 30px; min-height: 30px; height: 30px;
-                            #                              display: block;
-                            #                              overflow-y: hidden;
-                            #                          '''
-                            #                      }])
-                            
-                            ### Table with full text
                             dash_table.DataTable(id="subreddittable", page_size=5,
+                                                 # fixed_rows={'headers': True},
+                                                 style_header={'font-weight': 'bold'},
+                                                 style_data={'whiteSpace': 'normal'},
                                                  style_cell={'font-family':'sans-serif'},
-                                                 style_data={'whiteSpace': 'normal', 'height': 'auto'})
+                                                 css=[{
+                                                     'selector': '.dash-spreadsheet td div',
+                                                     'rule': '''
+                                                         line-height: 15px;
+                                                         max-height: 70px; min-height: 33px;
+                                                         display: block;
+                                                         overflow-y: auto;
+                                                     '''
+                                                }]
+                            )
+                            ### End of table
                         ])
                     ])
 
