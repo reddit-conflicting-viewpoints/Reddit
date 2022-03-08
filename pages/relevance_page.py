@@ -1,20 +1,21 @@
 from dash import dcc, html, Input, Output, callback
-from pages.visualize import *
-from pages.sas_key import get_df
 import pandas as pd
+import plotly.express as px
 
-layout = html.Div([
-    dcc.Loading(children=[dcc.Graph(id='first')], color='#119DFF', type='dot', fullscreen=True),
-])
+layout =html.Div([
+            html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
+            dcc.Loading(children=[
+                html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
+                dcc.Graph(id='first')
+            ], fullscreen=True),
+        ])
 
 @callback(
     Output('first', 'figure'),
+    Output('relevancesubredditprinter', 'children'),
     Input('session', 'data')
 )
 def update_graph(data):
-    # subreddit = data
-    # df = get_df(subreddit)
-    print(data)
     df = pd.DataFrame(data)
-    print(df)
-    return plot('scatter', df, x_col='comment_relevance', y_col='comment_score', title="test", threshold_col='comment_relevance', threshold_min=0.5, threshold_max=1)
+    subreddit = df.at[0, 'subreddit']
+    return px.histogram(df, x="comment_relevance", title=f'Comment Relevance Histogram (Subreddit: {subreddit})'), f'Subreddit: {subreddit}'
