@@ -18,7 +18,7 @@ server = app.server
 file1 = open("pages/subreddit_list.txt", "r")
 subreddits = file1.readlines()
 subreddits = list(set(map(lambda item: item.replace('\n', ''), subreddits)))
-subreddits.sort()
+subreddits.sort(key=str.lower)
 file1.close()
 
 # styling the sidebar
@@ -118,9 +118,13 @@ def render_page_content(pathname):
         ### Sentiment Page
         elif pathname == "/sentimentanalysis":
             return sentimentanalysis_page.layout
+    except ValueError as e:
+        print(e)
+        return html.H1('No data loaded. Head to Home Page First!', style={'textAlign':'center'})
     except NameError as e:
         print(e)
         return html.H1('No data loaded. Head to Home Page First!', style={'textAlign':'center'})
+    
 
     ### 404 Page
     # If the user tries to reach a different page, return a 404 message
