@@ -70,7 +70,7 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 
 app.layout = html.Div([
     dcc.Location(id="url"),
-    dcc.Loading(children=[dcc.Store(id='session', storage_type='local')], fullscreen=True),
+    dcc.Loading(children=[dcc.Store(id='session', storage_type='memory')], fullscreen=True),
     # dcc.Loading(children=[html.Div(id='session', style={'display':'none'})], fullscreen=True),
     sidebar,
     content

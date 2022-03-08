@@ -17,6 +17,9 @@ layout =html.Div([
     Input('session', 'data')
 )
 def update_graph(data):
-    df = pd.DataFrame(data)
-    subreddit = df.at[0, 'subreddit']
-    return px.histogram(df, x="comment_relevance", title=f'Comment Relevance Histogram (Subreddit: {subreddit})'), f'Subreddit: {subreddit}'
+    try:
+        df = pd.DataFrame(data)
+        subreddit = df.at[0, 'subreddit']
+        return px.histogram(df, x="comment_relevance", title=f'Comment Relevance Histogram (Subreddit: {subreddit})'), f'Subreddit: {subreddit}'
+    except KeyError:
+        return {}, 'No data loaded! Go to Home Page first!'

@@ -17,6 +17,9 @@ layout =html.Div([
     Input('session', 'data')
 )
 def update_graph(data):
-    df = pd.DataFrame(data)
-    subreddit = df.at[0, 'subreddit']
-    return f'Subreddit: {subreddit}'
+    try:
+        df = pd.DataFrame(data)
+        subreddit = df.at[0, 'subreddit']
+        return f'Subreddit: {subreddit}'
+    except KeyError:
+            return 'No data loaded! Go to Home Page first!'
