@@ -12,6 +12,9 @@ layout = html.Div([
     Input('session', 'data')
 )
 def update_graph(data):
-    subreddit = data
-    df = get_df(subreddit)
-    return plot('scatter', df, x_col='comment_relevance', y_col='comment_score', title=subreddit, threshold_col='comment_relevance', threshold_min=0.5, threshold_max=1)
+    # subreddit = data
+    # df = get_df(subreddit)
+    print(data)
+    df = pd.DataFrame(data)
+    print(df)
+    return plot('scatter', df, x_col='comment_relevance', y_col='comment_score', title="test", threshold_col='comment_relevance', threshold_min=0.5, threshold_max=1)
