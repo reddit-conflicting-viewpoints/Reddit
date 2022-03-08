@@ -2,6 +2,7 @@ from dash import dcc, html, Input, Output, callback
 import plotly.express as px
 import pandas as pd
 
+
 layout =html.Div([
             html.H1('Topic Modeling - What are posts talking about?',style={'textAlign':'center'}),
             dcc.Loading(children=[
