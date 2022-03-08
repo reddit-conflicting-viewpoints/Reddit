@@ -87,11 +87,47 @@ class AsyncRedditScraper:
 
             comment_forests = await asyncio.gather(*[post.comments() for post in posts])
             await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
+
+            # try:
+            #     comments = await asyncio.gather(*[comment_forest.list() for comment_forest in comment_forests])
+            #     comments = [item for sublist in comments for item in sublist[:self.config.max_comment_per_post][::-1]]
+            #     await asyncio.gather(*[comment.author() for comment in comments])
+            # except Exception as e:
+            #     print(e)
+
+            # try:
+            #     await asyncio.gather(*[comment.author.load() for comment_forest in comment_forests for comment in comment_forest.list()])
+            # except Exception as e:
+            #     print(e)
+
+            # try:
+            #     all_comments = []
+            #     for comment_forest in comment_forests:
+            #         top_comments = comment_forest.list()
+            #         while top_comments:
+            #             comment = top_comments.pop()
+            #             all_comments.append(comment)
+            #     await asyncio.gather(*[commentt.author.load() for commentt in all_comments])
+            # except Exception as e:
+            #     print(e)
+            
+            # try:
+            #     all_comments = []
+            #     for comment_forest in comment_forests:
+            #         top_comments = comment_forest.list()
+            #         while top_comments:
+            #             comment = top_comments.pop()
+            #             all_comments.append(comment)
+            #     await asyncio.gather(*[await commentt.author.load() for commentt in all_comments])
+            # except Exception as e:
+            #     print(e)
+
             comment_count = 0
             iteration_count = 0
             try:
                 for comment_forest in comment_forests:
                     top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
+                    # await asyncio.gather(*[commentt.author.load() for commentt in top_comments])
                     comment_count += len(top_comments)
                     iteration_count += 1
                     while top_comments:
@@ -101,11 +137,9 @@ class AsyncRedditScraper:
                         comments_retrieved.append([comment.submission.id,
                                                    comment.id,
                                                    comment.parent_id,
-                                                   # comment_author.id,
+                                                   # comment.author.id,
                                                    comment.body,
                                                    comment.ups,
-                                                   # comment.downs,
-                                                   # comment.ups / (comment.ups + comment.downs),
                                                    comment.controversiality,
                                                    comment.total_awards_received,
                                                    comment.locked,
@@ -117,12 +151,11 @@ class AsyncRedditScraper:
             except Exception as e:
                 print(e)
 
+            # await asyncio.gather(*[post.author.load() for post in posts])
             try:
                 for post in posts[:iteration_count]:
-                    # reddit_user = post.author
-                    # await reddit_user.load()
                     posts_retrieved.append([post.id,
-                                            # reddit_user.id,
+                                            # post.author.id,
                                             post.title,
                                             post.link_flair_text,
                                             post.score,
@@ -135,46 +168,14 @@ class AsyncRedditScraper:
             except Exception as e:
                 print(e)
 
-        # posts_df = pd.DataFrame(posts_retrieved,
-        #                         columns=['post_id', 'post_user_id', 'title', 'flair', 'score', 'post_upvote_ratio',
-        #                                  'subreddit', 'url', 'num_comments', 'body', 'created'])
-        # comments_df = pd.DataFrame(comments_retrieved,
-        #                            columns=['post_id', 'comment_id', 'parent_id', 'comment_user_id', 'comment', 
-        #                                     'up_vote_count', 'down_vote_count', 'comment_upvote_ratio', 'controversiality',
-        #                                     'total_awards_received', 'is_locked', 'is_collapsed',
-        #                                     'is_submitter', 'created_utc'])
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
                                          'subreddit', 'url', 'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                   columns=['post_id', 'comment_id', 'parent_id', 'comment', 
-                                            'up_vote_count', 'controversiality',
+                                   columns=['post_id', 'comment_id', 'parent_id', # 'comment_user_id',
+                                            'comment', 'up_vote_count', 'controversiality',
                                             'total_awards_received', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
-        # try:
-        #     comments_df['comment_upvote_ratio'] = 0
-        #     for i in range(len(comments_df)):
-        #         upvote_c = int(comments_df.iloc[i]['up_vote_count'])
-        #         downvote_c = int(comments_df.iloc[i]['down_vote_count'])
-        #         summ = upvote_c + downvote_c
-        #         if summ == 0:
-        #             comments_df.at[i, 'comment_upvote_ratio'] = np.nan
-        #         else:
-        #             comments_df.at[i, 'comment_upvote_ratio'] = np.round(upvote_c / summ, decimals=2)
-        # except Exception as e:
-        #         print(e)
-        # try:
-        #     posts_df['post_upvote_ratio'] = 0
-        #     for i in range(len(posts_df)):
-        #         upvote_c = int(posts_df.iloc[i]['score'])
-        #         downvote_c = int(posts_df.iloc[i]['post_down_vote_count'])
-        #         summ = upvote_c + downvote_c
-        #         if summ == 0:
-        #             posts_df.at[i, 'post_upvote_ratio'] = np.nan
-        #         else:
-        #             posts_df.at[i, 'post_upvote_ratio'] = np.round(upvote_c / summ, decimals=2)
-        # except Exception as e:
-        #         print(e)
         return SubRedditData(subreddit_name, posts_df, comments_df)
 
     @async_retry(times=3, delay=10)

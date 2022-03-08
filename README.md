@@ -1,6 +1,11 @@
 # Reddit
+[![](https://heroku-status-badges.herokuapp.com/bereddit-dash)](http://bereddit-dash.herokuapp.com/)
+![](https://img.shields.io/badge/python-v3.7.12-blue)
+![](https://img.shields.io/badge/license-MIT-blue)
+
 Reddit project
 
+Web Visualization Dashboard can be found [here](http://bereddit-dash.herokuapp.com/).
 
 ### Installing development requirements
 
