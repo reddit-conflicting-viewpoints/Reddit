@@ -2,10 +2,11 @@ from dash import dcc, html, Input, Output, callback
 import pandas as pd
 import plotly.express as px
 
+
 layout =html.Div([
             html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
             dcc.Loading(children=[
-                html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
+                html.P(id="relevancesubredditprinter", style={'textAlign':'center'}),
                 dcc.Graph(id='first')
             ], fullscreen=True),
         ])
