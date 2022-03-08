@@ -75,14 +75,16 @@ class AsyncRedditScraper:
             comments_retrieved = []
             subreddit_retrieved = []
 
-            subreddit = await session.subreddit(subreddit_name)
+            subreddit = await session.subreddit(subreddit_name, fetch=True)
 
-            subreddit_retrieved.append([
-                subreddit.display_name,
-                subreddit.description,
-                subreddit.public_description,
-                subreddit.subscribers
-            ])
+            try:
+                subreddit_retrieved.append([
+                    subreddit.display_name,
+                    subreddit.public_description,
+                    subreddit.subscribers
+                ])
+            except Exception as e:
+                print(e)
 
             scrape_order = {
                 'hot': subreddit.hot,
@@ -141,7 +143,7 @@ class AsyncRedditScraper:
             except Exception as e:
                 print(e)
 
-        subreddit_df = pd.DataFrame(subreddit_retrieved, columns=['name', 'description', 'public_description', 'subscribers'])
+        subreddit_df = pd.DataFrame(subreddit_retrieved, columns=['name', 'description', 'subscribers'])
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
                                          'subreddit', 'url', 'num_comments', 'body', 'created'])
@@ -176,10 +178,15 @@ class AsyncRedditScraper:
     def save_to_file(self):
         if not self._data:
             pass
+
         p = get_project_root()
-        p.mkdir(parents=True, exist_ok=True)
+        t1 = get_project_root().joinpath('data/results')
+        t1.mkdir(parents=True, exist_ok=True)
+        t2 = get_project_root().joinpath('data/raw')
+        t2.mkdir(parents=True, exist_ok=True)
+
         for data_obj in self._data:
-            data_obj.subreddit_df.to_csv(p.joinpath(f'data/results/{data_obj.name}_{self.config.scrape_order}_subreddit.csv'))
+            data_obj.subreddit_df.to_csv(p.joinpath(f'data/results/{data_obj.name}_{self.config.scrape_order}_subreddit.csv'), index=False)
             data_obj.posts_df.to_csv(p.joinpath(f'data/raw/{data_obj.name}_{self.config.scrape_order}_posts.csv'), index=False)
             data_obj.comments_df.to_csv(p.joinpath(f'data/raw/{data_obj.name}_{self.config.scrape_order}_comments.csv'), index=False)
         return self
