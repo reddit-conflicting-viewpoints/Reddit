@@ -7,6 +7,7 @@ layout =html.Div([
             html.H1('Topic Modeling - What are posts talking about?',style={'textAlign':'center'}),
             dcc.Loading(children=[
                 html.H3(id='topicsubredditprinter', style={'textAlign':'center'}),
+                # dcc.Graph(id='topic1'),
             ], fullscreen=True),
         ])
 

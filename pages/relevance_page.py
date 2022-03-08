@@ -7,12 +7,12 @@ layout =html.Div([
             html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
             dcc.Loading(children=[
                 html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
-                dcc.Graph(id='first')
+                dcc.Graph(id='relevance1')
             ], fullscreen=True),
         ])
 
 @callback(
-    Output('first', 'figure'),
+    Output('relevance1', 'figure'),
     Output('relevancesubredditprinter', 'children'),
     Input('session', 'data')
 )
