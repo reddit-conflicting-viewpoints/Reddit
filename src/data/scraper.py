@@ -46,6 +46,7 @@ def async_retry(times=3, delay=0):
 @dataclass(frozen=True)
 class SubRedditData:
     name: str
+    subreddit_df: pd.DataFrame = field(repr=False)
     posts_df: pd.DataFrame = field(repr=False)
     comments_df: pd.DataFrame = field(repr=False)
 
@@ -72,7 +73,18 @@ class AsyncRedditScraper:
         async with self._generate_session() as session:
             posts_retrieved = []
             comments_retrieved = []
-            subreddit = await session.subreddit(subreddit_name)
+            subreddit_retrieved = []
+
+            subreddit = await session.subreddit(subreddit_name, fetch=True)
+
+            try:
+                subreddit_retrieved.append([
+                    subreddit.display_name,
+                    subreddit.public_description,
+                    subreddit.subscribers
+                ])
+            except Exception as e:
+                print(e)
 
             scrape_order = {
                 'hot': subreddit.hot,
@@ -88,46 +100,11 @@ class AsyncRedditScraper:
             comment_forests = await asyncio.gather(*[post.comments() for post in posts])
             await asyncio.gather(*[comment_forest.replace_more(0) for comment_forest in comment_forests])
 
-            # try:
-            #     comments = await asyncio.gather(*[comment_forest.list() for comment_forest in comment_forests])
-            #     comments = [item for sublist in comments for item in sublist[:self.config.max_comment_per_post][::-1]]
-            #     await asyncio.gather(*[comment.author() for comment in comments])
-            # except Exception as e:
-            #     print(e)
-
-            # try:
-            #     await asyncio.gather(*[comment.author.load() for comment_forest in comment_forests for comment in comment_forest.list()])
-            # except Exception as e:
-            #     print(e)
-
-            # try:
-            #     all_comments = []
-            #     for comment_forest in comment_forests:
-            #         top_comments = comment_forest.list()
-            #         while top_comments:
-            #             comment = top_comments.pop()
-            #             all_comments.append(comment)
-            #     await asyncio.gather(*[commentt.author.load() for commentt in all_comments])
-            # except Exception as e:
-            #     print(e)
-            
-            # try:
-            #     all_comments = []
-            #     for comment_forest in comment_forests:
-            #         top_comments = comment_forest.list()
-            #         while top_comments:
-            #             comment = top_comments.pop()
-            #             all_comments.append(comment)
-            #     await asyncio.gather(*[await commentt.author.load() for commentt in all_comments])
-            # except Exception as e:
-            #     print(e)
-
             comment_count = 0
             iteration_count = 0
             try:
                 for comment_forest in comment_forests:
                     top_comments = comment_forest.list()[:self.config.max_comment_per_post][::-1]
-                    # await asyncio.gather(*[commentt.author.load() for commentt in top_comments])
                     comment_count += len(top_comments)
                     iteration_count += 1
                     while top_comments:
@@ -151,11 +128,9 @@ class AsyncRedditScraper:
             except Exception as e:
                 print(e)
 
-            # await asyncio.gather(*[post.author.load() for post in posts])
             try:
                 for post in posts[:iteration_count]:
                     posts_retrieved.append([post.id,
-                                            # post.author.id,
                                             post.title,
                                             post.link_flair_text,
                                             post.score,
@@ -168,15 +143,16 @@ class AsyncRedditScraper:
             except Exception as e:
                 print(e)
 
+        subreddit_df = pd.DataFrame(subreddit_retrieved, columns=['name', 'description', 'subscribers'])
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
                                          'subreddit', 'url', 'num_comments', 'body', 'created'])
         comments_df = pd.DataFrame(comments_retrieved,
-                                   columns=['post_id', 'comment_id', 'parent_id', # 'comment_user_id',
+                                   columns=['post_id', 'comment_id', 'parent_id',
                                             'comment', 'up_vote_count', 'controversiality',
                                             'total_awards_received', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
-        return SubRedditData(subreddit_name, posts_df, comments_df)
+        return SubRedditData(subreddit_name, subreddit_df, posts_df, comments_df)
 
     @async_retry(times=3, delay=10)
     async def scrape(self):
@@ -202,11 +178,17 @@ class AsyncRedditScraper:
     def save_to_file(self):
         if not self._data:
             pass
-        p = get_project_root().joinpath('data/raw')
-        p.mkdir(parents=True, exist_ok=True)
+
+        p = get_project_root()
+        t1 = get_project_root().joinpath('data/results')
+        t1.mkdir(parents=True, exist_ok=True)
+        t2 = get_project_root().joinpath('data/raw')
+        t2.mkdir(parents=True, exist_ok=True)
+
         for data_obj in self._data:
-            data_obj.posts_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_posts.csv'), index=False)
-            data_obj.comments_df.to_csv(p.joinpath(f'{data_obj.name}_{self.config.scrape_order}_comments.csv'), index=False)
+            data_obj.subreddit_df.to_csv(p.joinpath(f'data/results/{data_obj.name}_{self.config.scrape_order}_subreddit.csv'), index=False)
+            data_obj.posts_df.to_csv(p.joinpath(f'data/raw/{data_obj.name}_{self.config.scrape_order}_posts.csv'), index=False)
+            data_obj.comments_df.to_csv(p.joinpath(f'data/raw/{data_obj.name}_{self.config.scrape_order}_comments.csv'), index=False)
         return self
 
 
