@@ -1,4 +1,5 @@
 import sys
+import argparse
 import time
 import logging
 import asyncio
@@ -9,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import List
 from src.utils import get_project_root
 from contextlib import asynccontextmanager
-from config import ScraperConfig, default_config
+from config import ScraperConfig
 
 # reddit API credentials
 CLIENT_ID = 'xG2uYfBViT_APANuInp5Yw'
@@ -192,8 +193,8 @@ class AsyncRedditScraper:
         return self
 
 
-async def main():
-    scraper = AsyncRedditScraper(default_config)
+async def main(argparse_config):
+    scraper = AsyncRedditScraper(argparse_config)
     scraped = await scraper.scrape()
     logger.info("All Success!")
     for data_obj in scraped._data:
@@ -204,7 +205,45 @@ async def main():
 
 
 if __name__ == '__main__':
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+
+    # Subreddit argument
+    parser.add_argument('-s', '--subreddit', type=str, 
+            default="computerscience",
+            help='Subreddit to scrape data from. "computerscience" by default')
+
+    # Scrape order argument
+    parser.add_argument('-o', '--order', type=str, 
+            default="hot",
+            help='The order to scrape the data by. "hot" by default')
+
+    # Maximum number of posts to scrape
+    parser.add_argument('-mp', '--maxpost', type=int, 
+            default=1000,
+            help='The maximum number of posts that can be scraped. "1000" by default')
+
+    # Maximum number of posts to scrape
+    parser.add_argument('-mcp', '--maxcommentpost', type=int, 
+            default=100,
+            help='The maximum number comments scraped per post. "100" by default')
+
+    # Maximum number of comments to scrape
+    parser.add_argument('-mc', '--maxcomment', type=int, 
+            default=10000,
+            help='The maximum number comments scraped. "10000" by default')
+
+    # Parse the args
+    args = parser.parse_args()
+    argparse_config = ScraperConfig(
+        subreddit_list=[args.subreddit],
+        scrape_order=args.order,
+        max_post_count=args.maxpost,
+        max_comment_per_post=args.maxcommentpost,
+        max_comment_count=args.maxcomment
+    )
+
     tik = time.perf_counter()
-    asyncio.run(main())
+    asyncio.run(main(argparse_config))
     tok = time.perf_counter()
     logger.info(f"total run time {tok-tik}")
