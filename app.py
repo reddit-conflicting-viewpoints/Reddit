@@ -1,10 +1,10 @@
 # Code source: https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 import dash
-from dash import html, dcc, callback
+from dash import html, dcc, callback, dash_table
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.express as px
-from pages.sas_key import get_df
+from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
 from pages import relevance_page, topicmodeling_page, sentimentanalysis_page
@@ -41,7 +41,13 @@ CONTENT_STYLE = {
 
 # Center of Div
 CENTER_STYLE = {
-    'width': '50%',
+    'width': '70%',
+    'margin': '0 auto',
+}
+
+TEXT_STYLE = {
+    'textAlign':'center',
+    'width': '70%',
     'margin': '0 auto',
 }
 
@@ -99,12 +105,41 @@ def render_page_content(pathname):
                         # Drop down menu for selecting SubReddit
                         html.Div([
                             html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
-                            dcc.Dropdown(
-                                subreddits,
-                                "computerscience",
-                                id='data'
+                            html.Div([
+                                dcc.Dropdown(
+                                    subreddits,
+                                    "computerscience",
+                                    id='data',
+                                )
+                            ], style=CENTER_STYLE),
+                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
+                            html.H5("Subreddit Description:", style=TEXT_STYLE),
+                            html.P(id='subredditdescription', style=TEXT_STYLE),
+                            html.H5("Subreddit Quick Facts:", style=TEXT_STYLE),
+                            dash_table.DataTable(id="subredditfacts",
+                                                 style_header={'font-weight': 'bold'},
+                                                 style_cell={'font-family':'sans-serif'},
+                                                 style_data={'whiteSpace': 'normal', 'height': 'auto'}),
+                            html.H5("Post Data Preview:", style=TEXT_STYLE),
+                            
+                            ### Table that cuts off text
+                            dash_table.DataTable(id="subreddittable", page_size=5,
+                                                 # fixed_rows={'headers': True},
+                                                 style_header={'font-weight': 'bold'},
+                                                 style_data={'whiteSpace': 'normal'},
+                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
+                                                 css=[{
+                                                     'selector': '.dash-spreadsheet td div',
+                                                     'rule': '''
+                                                         line-height: 15px;
+                                                         max-height: 70px; min-height: 33px;
+                                                         display: block;
+                                                         overflow-y: auto;
+                                                     '''
+                                                }]
                             )
-                        ], style=CENTER_STYLE)
+                            ### End of table
+                        ])
                     ])
 
         ### Relevance Page
@@ -124,7 +159,7 @@ def render_page_content(pathname):
     except NameError as e:
         print(e)
         return html.H1('No data loaded. Head to Home Page First!', style={'textAlign':'center'})
-    
+
 
     ### 404 Page
     # If the user tries to reach a different page, return a 404 message
@@ -133,11 +168,32 @@ def render_page_content(pathname):
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
     Output('session', 'data'),
+    Output('homesubredditprinter', 'children'),
+    Output('subredditdescription', 'children'),
+    Output('subredditfacts', 'data'),
+    Output('subreddittable', 'data'),
     Input('data', 'value')
 )
 def update_df(value):
+    # Load the data
     df = get_df(value)
-    return df.to_dict("records")
+    subreddit_df = get_df_description(value)
+
+    # Obtain description of the subreddit
+    description = subreddit_df.at[0, 'description']
+
+    # Posts Table
+    table_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False).first()
+
+    # Quick Facts Table
+    number_of_posts = len(table_df)
+    number_of_comments = len(df)
+    facts = [{
+        "Number of hot posts scraped": number_of_posts,
+        "Number of hot comments scraped": number_of_comments,
+        "Number of subscribers": subreddit_df.at[0, 'subscribers']
+    }]
+    return df.to_dict("records"), f"Selected: {value}", description, facts, table_df.to_dict('records')
 
 
 if __name__=='__main__':

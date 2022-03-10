@@ -24,6 +24,6 @@ def update_graph(data):
     try:
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
-        return px.box(df, x="comment_sentiment", y='comment_relevance'), px.histogram(df, x="comment_sentiment"), px.box(df, x="post_id", y='comment_relevance'), f'Subreddit: {subreddit}'
+        return px.histogram(df, x="comment_sentiment"), px.box(df, x="comment_sentiment", y='comment_relevance'), px.box(df, x="post_id", y='comment_relevance'), f'Subreddit: {subreddit}'
     except KeyError:
             return {}, {}, {}, 'No data loaded! Go to Home Page first!'
