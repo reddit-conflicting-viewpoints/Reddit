@@ -66,31 +66,35 @@ layout =html.Div([
     Output('subredditfacts', 'data'),
     Output('subreddittable', 'data'),
     Output('subredditcommenttable', 'data'),
-    Input('session', 'data')
+    Input('session', 'data'),
+    # Input('subreddittable', '')
 )
 def update_df(data):
-    # Load the data
-    df = pd.DataFrame(data)
-    subreddit = df.at[0, 'subreddit']
-    subreddit_df = get_df_description(subreddit)
+    try:
+        # Load the data
+        df = pd.DataFrame(data)
+        subreddit = df.at[0, 'subreddit']
+        subreddit_df = get_df_description(subreddit)
 
-    # Obtain description of the subreddit
-    description = subreddit_df.at[0, 'description']
+        # Obtain description of the subreddit
+        description = subreddit_df.at[0, 'description']
 
-    # Posts Table
-    post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
-    post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
+        # Posts Table
+        post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
+        post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
 
-    # Comments Table
-    comment_df = df[['post_id', 'comment_id', 'comment']].copy()
-    comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
+        # Comments Table
+        comment_df = df[['post_id', 'comment_id', 'comment']].copy()
+        comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
 
-    # Quick Facts Table
-    number_of_posts = len(post_df)
-    number_of_comments = len(df)
-    facts = [{
-        "Number of hot posts scraped": number_of_posts,
-        "Number of hot comments scraped": number_of_comments,
-        "Number of subscribers": subreddit_df.at[0, 'subscribers']
-    }]
-    return f"Selected: {subreddit}", description, facts, post_df.to_dict('records'), comment_df.to_dict('records')
+        # Quick Facts Table
+        number_of_posts = len(post_df)
+        number_of_comments = len(df)
+        facts = [{
+            "Number of hot posts scraped": number_of_posts,
+            "Number of hot comments scraped": number_of_comments,
+            "Number of subscribers": subreddit_df.at[0, 'subscribers']
+        }]
+        return f"Selected: {subreddit}", description, facts, post_df.to_dict('records'), comment_df.to_dict('records')
+    except KeyError:
+        return 'No data loaded! Go to Home Page first!', "", [], [], []
