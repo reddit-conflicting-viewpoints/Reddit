@@ -120,10 +120,28 @@ def render_page_content(pathname):
                                                  style_header={'font-weight': 'bold'},
                                                  style_cell={'font-family':'sans-serif'},
                                                  style_data={'whiteSpace': 'normal', 'height': 'auto'}),
+
                             html.H5("Post Data Preview:", style=TEXT_STYLE),
-                            
-                            ### Table that cuts off text
+                            ### Posts Table
                             dash_table.DataTable(id="subreddittable", page_size=5,
+                                                 # fixed_rows={'headers': True},
+                                                 style_header={'font-weight': 'bold'},
+                                                 style_data={'whiteSpace': 'normal'},
+                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
+                                                 css=[{
+                                                     'selector': '.dash-spreadsheet td div',
+                                                     'rule': '''
+                                                         line-height: 15px;
+                                                         max-height: 70px; min-height: 33px;
+                                                         display: block;
+                                                         overflow-y: auto;
+                                                     '''
+                                                }]
+                            ),
+                            ### End of table
+                            html.H5("Comments Data Preview:", style=TEXT_STYLE),
+                            ### Comments Table
+                            dash_table.DataTable(id="subredditcommenttable", page_size=5,
                                                  # fixed_rows={'headers': True},
                                                  style_header={'font-weight': 'bold'},
                                                  style_data={'whiteSpace': 'normal'},
@@ -172,6 +190,7 @@ def render_page_content(pathname):
     Output('subredditdescription', 'children'),
     Output('subredditfacts', 'data'),
     Output('subreddittable', 'data'),
+    Output('subredditcommenttable', 'data'),
     Input('data', 'value')
 )
 def update_df(value):
@@ -183,17 +202,22 @@ def update_df(value):
     description = subreddit_df.at[0, 'description']
 
     # Posts Table
-    table_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False).first()
+    post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
+    post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
+
+    # Comments Table
+    comment_df = df[['post_id', 'comment_id', 'comment']].copy()
+    comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
 
     # Quick Facts Table
-    number_of_posts = len(table_df)
+    number_of_posts = len(post_df)
     number_of_comments = len(df)
     facts = [{
         "Number of hot posts scraped": number_of_posts,
         "Number of hot comments scraped": number_of_comments,
         "Number of subscribers": subreddit_df.at[0, 'subscribers']
     }]
-    return df.to_dict("records"), f"Selected: {value}", description, facts, table_df.to_dict('records')
+    return df.to_dict("records"), f"Selected: {value}", description, facts, post_df.to_dict('records'), comment_df.to_dict('records')
 
 
 if __name__=='__main__':
