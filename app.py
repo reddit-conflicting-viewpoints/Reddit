@@ -7,7 +7,7 @@ import plotly.express as px
 from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
-from pages import relevance_page, topicmodeling_page, sentimentanalysis_page
+from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
@@ -61,6 +61,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("Quick Facts", href="/facts", active="exact"),
                 dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
@@ -113,34 +114,13 @@ def render_page_content(pathname):
                                 )
                             ], style=CENTER_STYLE),
                             html.H3(id="homesubredditprinter", style=TEXT_STYLE),
-                            html.H5("Subreddit Description:", style=TEXT_STYLE),
-                            html.P(id='subredditdescription', style=TEXT_STYLE),
-                            html.H5("Subreddit Quick Facts:", style=TEXT_STYLE),
-                            dash_table.DataTable(id="subredditfacts",
-                                                 style_header={'font-weight': 'bold'},
-                                                 style_cell={'font-family':'sans-serif'},
-                                                 style_data={'whiteSpace': 'normal', 'height': 'auto'}),
-                            html.H5("Post Data Preview:", style=TEXT_STYLE),
-                            
-                            ### Table that cuts off text
-                            dash_table.DataTable(id="subreddittable", page_size=5,
-                                                 # fixed_rows={'headers': True},
-                                                 style_header={'font-weight': 'bold'},
-                                                 style_data={'whiteSpace': 'normal'},
-                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
-                                                 css=[{
-                                                     'selector': '.dash-spreadsheet td div',
-                                                     'rule': '''
-                                                         line-height: 15px;
-                                                         max-height: 70px; min-height: 33px;
-                                                         display: block;
-                                                         overflow-y: auto;
-                                                     '''
-                                                }]
-                            )
-                            ### End of table
+                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
                         ])
                     ])
+        
+        ### Quick Facts Page
+        elif pathname == "/facts":
+            return facts_page.layout
 
         ### Relevance Page
         elif pathname == "/relevance":
@@ -169,9 +149,6 @@ def render_page_content(pathname):
 @app.callback(
     Output('session', 'data'),
     Output('homesubredditprinter', 'children'),
-    Output('subredditdescription', 'children'),
-    Output('subredditfacts', 'data'),
-    Output('subreddittable', 'data'),
     Input('data', 'value')
 )
 def update_df(value):
@@ -183,17 +160,22 @@ def update_df(value):
     description = subreddit_df.at[0, 'description']
 
     # Posts Table
-    table_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False).first()
+    post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
+    post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
+
+    # Comments Table
+    comment_df = df[['post_id', 'comment_id', 'comment']].copy()
+    comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
 
     # Quick Facts Table
-    number_of_posts = len(table_df)
+    number_of_posts = len(post_df)
     number_of_comments = len(df)
     facts = [{
         "Number of hot posts scraped": number_of_posts,
         "Number of hot comments scraped": number_of_comments,
         "Number of subscribers": subreddit_df.at[0, 'subscribers']
     }]
-    return df.to_dict("records"), f"Selected: {value}", description, facts, table_df.to_dict('records')
+    return df.to_dict("records"), f"Selected: {value}"
 
 
 if __name__=='__main__':
