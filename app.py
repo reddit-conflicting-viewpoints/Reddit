@@ -7,7 +7,7 @@ import plotly.express as px
 from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
-from pages import relevance_page, topicmodeling_page, sentimentanalysis_page
+from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
@@ -61,6 +61,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("Quick Facts", href="/facts", active="exact"),
                 dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
@@ -113,52 +114,13 @@ def render_page_content(pathname):
                                 )
                             ], style=CENTER_STYLE),
                             html.H3(id="homesubredditprinter", style=TEXT_STYLE),
-                            html.H5("Subreddit Description:", style=TEXT_STYLE),
-                            html.P(id='subredditdescription', style=TEXT_STYLE),
-                            html.H5("Subreddit Quick Facts:", style=TEXT_STYLE),
-                            dash_table.DataTable(id="subredditfacts",
-                                                 style_header={'font-weight': 'bold'},
-                                                 style_cell={'font-family':'sans-serif'},
-                                                 style_data={'whiteSpace': 'normal', 'height': 'auto'}),
-
-                            html.H5("Post Data Preview:", style=TEXT_STYLE),
-                            ### Posts Table
-                            dash_table.DataTable(id="subreddittable", page_size=5,
-                                                 # fixed_rows={'headers': True},
-                                                 style_header={'font-weight': 'bold'},
-                                                 style_data={'whiteSpace': 'normal'},
-                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
-                                                 css=[{
-                                                     'selector': '.dash-spreadsheet td div',
-                                                     'rule': '''
-                                                         line-height: 15px;
-                                                         max-height: 70px; min-height: 33px;
-                                                         display: block;
-                                                         overflow-y: auto;
-                                                     '''
-                                                }]
-                            ),
-                            ### End of table
-                            html.H5("Comments Data Preview:", style=TEXT_STYLE),
-                            ### Comments Table
-                            dash_table.DataTable(id="subredditcommenttable", page_size=5,
-                                                 # fixed_rows={'headers': True},
-                                                 style_header={'font-weight': 'bold'},
-                                                 style_data={'whiteSpace': 'normal'},
-                                                 style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
-                                                 css=[{
-                                                     'selector': '.dash-spreadsheet td div',
-                                                     'rule': '''
-                                                         line-height: 15px;
-                                                         max-height: 70px; min-height: 33px;
-                                                         display: block;
-                                                         overflow-y: auto;
-                                                     '''
-                                                }]
-                            )
-                            ### End of table
+                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
                         ])
                     ])
+        
+        ### Quick Facts Page
+        elif pathname == "/facts":
+            return facts_page.layout
 
         ### Relevance Page
         elif pathname == "/relevance":
@@ -187,10 +149,6 @@ def render_page_content(pathname):
 @app.callback(
     Output('session', 'data'),
     Output('homesubredditprinter', 'children'),
-    Output('subredditdescription', 'children'),
-    Output('subredditfacts', 'data'),
-    Output('subreddittable', 'data'),
-    Output('subredditcommenttable', 'data'),
     Input('data', 'value')
 )
 def update_df(value):
@@ -217,7 +175,7 @@ def update_df(value):
         "Number of hot comments scraped": number_of_comments,
         "Number of subscribers": subreddit_df.at[0, 'subscribers']
     }]
-    return df.to_dict("records"), f"Selected: {value}", description, facts, post_df.to_dict('records'), comment_df.to_dict('records')
+    return df.to_dict("records"), f"Selected: {value}"
 
 
 if __name__=='__main__':
