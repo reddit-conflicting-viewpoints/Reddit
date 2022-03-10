@@ -2,6 +2,7 @@ from src.models.relevance_old import Relevance
 from src.models.bertmodels import BertModels
 import pandas as pd
 from src.utils import get_project_root
+import argparse
 
 
 class SubredditAnalysis:
@@ -180,3 +181,32 @@ class SubredditAnalysis:
             'sentiment_y': 'comment_sentiment',
             'relevance': 'comment_relevance'
         }, inplace=True)
+
+
+if __name__ == '__main__':
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+
+    # Subreddit argument
+    parser.add_argument('-s', '--subreddit', type=str, 
+            default="computerscience",
+            help='Subreddit to analyze from. "computerscience" by default')
+
+    # Scrape order argument
+    parser.add_argument('-o', '--order', type=str, 
+            default="hot",
+            help='The order the data was scraped by. "hot" by default')
+
+    # Maximum number of posts to analyze
+    parser.add_argument('-mp', '--maxpost', type=int, 
+            default=2000,
+            help='The maximum number of posts to analyze. "2000" by default')
+
+    # Maximum number of comments to analyze
+    parser.add_argument('-mc', '--maxcomment', type=int, 
+            default=20000,
+            help='The maximum number comments to analyze. "20000" by default')
+
+    # Parse the args
+    args = parser.parse_args()
+    b = SubredditAnalysis(args.subreddit, args.order, args.maxpost, args.maxcomment)
