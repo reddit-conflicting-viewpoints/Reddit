@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import List
 from src.utils import get_project_root
 from contextlib import asynccontextmanager
-from config import ScraperConfig
+from config import ScraperConfig, default_config
 
 # reddit API credentials
 CLIENT_ID = 'xG2uYfBViT_APANuInp5Yw'
@@ -193,8 +193,11 @@ class AsyncRedditScraper:
         return self
 
 
-async def main(argparse_config):
-    scraper = AsyncRedditScraper(argparse_config)
+async def main(argparse_config, default):
+    if default:
+        scraper = AsyncRedditScraper(default_config)
+    else:
+        scraper = AsyncRedditScraper(argparse_config)
     scraped = await scraper.scrape()
     logger.info("All Success!")
     for data_obj in scraped._data:
@@ -233,6 +236,13 @@ if __name__ == '__main__':
             default=10000,
             help='The maximum number comments scraped. "10000" by default')
 
+    # Flag indicator for to use default config for scraper.
+    parser.add_argument('-d',
+                        '--default',
+                        default=False,
+                        help='Flag to indicate use of default config. All other arguments will '
+                        'be ignored. "False" by default.', action='store_true')
+
     # Parse the args
     args = parser.parse_args()
     argparse_config = ScraperConfig(
@@ -244,6 +254,6 @@ if __name__ == '__main__':
     )
 
     tik = time.perf_counter()
-    asyncio.run(main(argparse_config))
+    asyncio.run(main(argparse_config, args.default))
     tok = time.perf_counter()
     logger.info(f"total run time {tok-tik}")
