@@ -9,7 +9,7 @@ from pages.visualize import *
 import pandas as pd
 from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
 server = app.server
@@ -53,7 +53,7 @@ TEXT_STYLE = {
 
 sidebar = html.Div(
     [
-        html.H2("BEReddiT", className="display-4"),
+        html.H2("BEReddiT", className="display-5"),
         html.Hr(),
         html.P(
             "Visualization Dashboard", className="lead"
@@ -61,7 +61,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Quick Facts", href="/facts", active="exact"),
+                dbc.NavLink("Subreddit", href="/facts", active="exact"),
                 dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
