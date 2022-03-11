@@ -8,7 +8,7 @@ layout =html.Div([
             dcc.Loading(children=[
                 html.H3(id='topicsubredditprinter', style={'textAlign':'center'}),
                 # dcc.Graph(id='topic1'),
-            ], fullscreen=True),
+            ]),
         ])
 
 @callback(
