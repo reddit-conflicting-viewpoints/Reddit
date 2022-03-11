@@ -14,6 +14,8 @@ PADDING_STYLE = {
     'margin-bottom': '10px'
 }
 
+THRESHOLD = 0.5
+
 PASS_TEST = """The p-value obtained is {pvalue:.2f}. This is less than 0.05, and therefore we conclude that there is enough evidence to support that the comments are not relevant to their posts."""
 
 FAIL_TEST = """The p-value obtained is {pvalue:.2f}. This is greater than 0.05, and therefore we conclude that there is not enough evidence to support that the comments are not relevant to their posts."""
@@ -28,7 +30,7 @@ layout =html.Div([
                 dcc.Loading(children=[
                     dcc.Graph(id='relevance1'),
                     html.P("Are the comments in the subreddit relevant to their posts?"),
-                    html.P("One Sample t-test (Alternate Hypothesis: mean relevance < 0.5):"),
+                    html.P(f"One Sample t-test (Alternate Hypothesis: mean relevance < {THRESHOLD}):"),
                     html.P(id='relttest'),
                 ]),
             ], style=PADDING_STYLE),
@@ -38,10 +40,24 @@ layout =html.Div([
             dbc.Card([
                 html.H5("Comment Relevance Table"),
                 dcc.Loading(children=[
-                    dash_table.DataTable(id="reltable", page_size=5,
+                    dash_table.DataTable(id="reltable", page_size=10,
                                      style_header={'font-weight': 'bold'},
                                      style_data={'whiteSpace': 'normal'},
                                      style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
+                                     style_data_conditional=[
+                                         {
+                                             'if': {
+                                                 'filter_query': '{Comment Relevance} >= 0.5',
+                                             },
+                                             'backgroundColor': 'lightgreen',
+                                         },
+                                         {
+                                             'if': {
+                                                 'filter_query': '{Comment Relevance} < 0.5',
+                                             },
+                                             'backgroundColor': '#FFB6C1',
+                                         }
+                                     ],
                                      css=[{
                                          'selector': '.dash-spreadsheet td div',
                                          'rule': '''
@@ -71,7 +87,7 @@ def update_graph(data):
 
         # Generate Comment Relevance Histogram Distribution plot
         df["color"] = np.select(
-                                [df["comment_relevance"].gt(0.5), df["comment_relevance"].lt(0.5)],
+                                [df["comment_relevance"].gt(THRESHOLD), df["comment_relevance"].lt(THRESHOLD)],
                                 ["green", "red"],
                                 "orange")
         comm_relevance_dist = px.histogram(df,
@@ -85,16 +101,20 @@ def update_graph(data):
                                            "red": "red",
                                            "orange": "orange"})
         comm_relevance_dist.update_layout(yaxis_title="Number of Comments", showlegend=False)
-        comm_relevance_dist.add_vline(x=0.5, line_width=3, line_dash="dash", line_color="black")
+        comm_relevance_dist.add_vline(x=THRESHOLD, line_width=3, line_dash="dash", line_color="black")
         
         # T-test
-        test = stats.ttest_1samp(a=df.comment_relevance, popmean=0.5, alternative='less')
+        test = stats.ttest_1samp(a=df.comment_relevance, popmean=THRESHOLD, alternative='less')
         if test.pvalue > 0.05:
             test_output = FAIL_TEST.format(pvalue=test.pvalue)
         else:
             test_output = PASS_TEST.format(pvalue=test.pvalue)
 
-        return f'Subreddit: {subreddit}', comm_relevance_dist, test_output, []
+        # Comment Relevance Table
+        comment_df = df[['comment', 'comment_relevance']].copy()
+
+        comment_df.rename(columns={'comment': 'Comment', 'comment_relevance': 'Comment Relevance'}, inplace=True)
+        return f'Subreddit: {subreddit}', comm_relevance_dist, test_output, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, "", []
