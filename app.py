@@ -53,7 +53,7 @@ TEXT_STYLE = {
 
 sidebar = html.Div(
     [
-        html.H2("BEReddiT", className="display-4"),
+        html.H2("BEReddiT", className="display-5"),
         html.Hr(),
         html.P(
             "Visualization Dashboard", className="lead"
