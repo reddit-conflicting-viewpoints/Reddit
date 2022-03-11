@@ -2,15 +2,8 @@ from dash import dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+from pages.style import PADDING_STYLE
 
-
-PADDING_STYLE = {
-    'padding-top': '5px',
-    'padding-right': '5px',
-    'padding-bottom': '5px',
-    'padding-left': '5px',
-    'margin-bottom': '10px'
-}
 
 layout =html.Div([
             html.H1('Sentiment Analysis - Can we identify conflict with Sentiment?',style={'textAlign':'center'}),

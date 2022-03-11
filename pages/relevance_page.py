@@ -4,15 +4,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import scipy.stats as stats
-
-
-PADDING_STYLE = {
-    'padding-top': '5px',
-    'padding-right': '5px',
-    'padding-bottom': '5px',
-    'padding-left': '5px',
-    'margin-bottom': '10px'
-}
+from pages.style import PADDING_STYLE
 
 THRESHOLD = 0.5
 
