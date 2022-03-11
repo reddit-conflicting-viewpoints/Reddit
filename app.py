@@ -7,12 +7,28 @@ import plotly.express as px
 from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
+from flask_caching import Cache
+import uuid
+import os
 from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
 server = app.server
+
+cache = Cache(app.server, config={
+    # 'CACHE_TYPE': 'redis',
+    # Note that filesystem cache doesn't work on systems with ephemeral
+    # filesystems like Heroku.
+    'CACHE_DIR': 'cache-directory',
+    'CACHE_TYPE': 'filesystem',
+    # 'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379'),
+
+    # should be equal to maximum number of users on the app at a single time
+    # higher numbers will store more data in the filesystem / redis cache
+    'CACHE_THRESHOLD': 10
+})
 
 # Read the list of available subreddits
 file1 = open("pages/subreddit_list.txt", "r")
@@ -145,6 +161,16 @@ def render_page_content(pathname):
     # If the user tries to reach a different page, return a 404 message
     return html.H1('404: Page Not Found', style={'textAlign':'center'})
 
+# @cache.memoize()
+def global_store(session_id, value):
+    @cache.memoize()
+    def query_and_serialize_data(session_id, value):
+        df = get_df(value)
+        return df.to_json()
+    return pd.read_json(query_and_serialize_data(session_id, value))
+    # df = get_df(value)
+    # return df
+
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
     Output('session', 'data'),
@@ -153,29 +179,9 @@ def render_page_content(pathname):
 )
 def update_df(value):
     # Load the data
-    df = get_df(value)
-    subreddit_df = get_df_description(value)
-
-    # Obtain description of the subreddit
-    description = subreddit_df.at[0, 'description']
-
-    # Posts Table
-    post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
-    post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
-
-    # Comments Table
-    comment_df = df[['post_id', 'comment_id', 'comment']].copy()
-    comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
-
-    # Quick Facts Table
-    number_of_posts = len(post_df)
-    number_of_comments = len(df)
-    facts = [{
-        "Number of hot posts scraped": number_of_posts,
-        "Number of hot comments scraped": number_of_comments,
-        "Number of subscribers": subreddit_df.at[0, 'subscribers']
-    }]
-    return df.to_dict("records"), f"Selected: {value}"
+    session_id = str(uuid.uuid4())
+    df = global_store(session_id, value)
+    return {'id': session_id, 'subreddit': value}, f"Selected: {value}"
 
 
 if __name__=='__main__':
