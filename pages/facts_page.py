@@ -28,7 +28,7 @@ layout =html.Div([
                     html.H5("Subreddit Quick Facts", style=TEXT_STYLE),
                     dash_table.DataTable(id="subredditfacts",
                                          style_header={'font-weight': 'bold'},
-                                         style_cell={'font-family':'sans-serif'},
+                                         style_cell={'font-family':'sans-serif', 'font-size': '14px'},
                                          style_data={'whiteSpace': 'normal', 'height': 'auto'}),
                 ])
             ], style=PADDING_STYLE),
@@ -41,7 +41,7 @@ layout =html.Div([
                                          # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
-                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
+                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
                                          columns=[{'name': 'post_id', 'id': 'post_id'}, {'name': 'post_title', 'id': 'post_title'}, {'name': 'post_body', 'id': 'post_body'}],
                                          css=[{
                                              'selector': '.dash-spreadsheet td div',
@@ -65,7 +65,7 @@ layout =html.Div([
                                          # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
-                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left'},
+                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
                                          css=[{
                                              'selector': '.dash-spreadsheet td div',
                                              'rule': '''
