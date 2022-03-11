@@ -1,14 +1,25 @@
 from dash import dcc, html, Input, Output, callback
+import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 
 
+PADDING_STYLE = {
+    'padding-top': '5px',
+    'padding-right': '5px',
+    'padding-bottom': '5px',
+    'padding-left': '5px',
+    'margin-bottom': '10px'
+}
+
 layout =html.Div([
             html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
-            dcc.Loading(children=[
-                html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
-                dcc.Graph(id='relevance1')
-            ], fullscreen=True),
+            html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
+            dbc.Card([
+                dcc.Loading(children=[
+                    dcc.Graph(id='relevance1')
+                ]),
+            ], style=PADDING_STYLE)
         ])
 
 @callback(
