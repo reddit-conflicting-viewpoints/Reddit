@@ -19,7 +19,6 @@ PADDING_STYLE = {
 }
 
 layout =html.Div([
-            html.Div(id='factsnone', style={'display': 'none'}),
             html.H1('Quick Facts',style={'textAlign':'center'}),
             html.H3(id="factssubredditprinter", style={'textAlign':'center'}),
             html.H5("Subreddit Description:", style=TEXT_STYLE),
@@ -39,6 +38,7 @@ layout =html.Div([
                 dcc.Loading(children=[
                 html.H5("Post Data Preview", style=TEXT_STYLE),
                     dash_table.DataTable(id="subreddittable", page_size=5,
+                                         # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
                                          style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
@@ -62,6 +62,7 @@ layout =html.Div([
                     html.H5("Comments Data Preview", style=TEXT_STYLE),
                     html.P("Click a post in the above Post Table to view comments for that post", style=TEXT_STYLE),
                     dash_table.DataTable(id="subredditcommenttable", page_size=5,
+                                         # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
                                          style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
@@ -85,12 +86,12 @@ layout =html.Div([
     Output('subredditdescription', 'children'),
     Output('subredditfacts', 'data'),
     Output('subreddittable', 'data'),
-    Input('factsnone', 'children')
+    Input('session', 'data'),
 )
 def update_df(data):
     try:
         # Load the data
-        df = pd.read_csv('temp.csv')
+        df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
         subreddit_df = get_df_description(subreddit)
 
@@ -117,12 +118,15 @@ def update_df(data):
 
 @callback(
     Output('subredditcommenttable', 'data'),
+    Input('session', 'data'),
     Input('subreddittable', 'active_cell')
 )
-def update_comment_table(active_cell):
+def update_comment_table(data, active_cell):
     try:
-        df = pd.read_csv('temp.csv')
+        # Load DataFrame
+        df = pd.DataFrame(data)
         
+        # Comments Table
         comment_df = df[['post_id', 'comment_id', 'comment']].copy()
         comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
         

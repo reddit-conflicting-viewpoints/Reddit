@@ -77,7 +77,7 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 
 app.layout = html.Div([
     dcc.Location(id="url"),
-    # dcc.Loading(children=[dcc.Store(id='session', storage_type='memory')], fullscreen=True),
+    dcc.Loading(children=[dcc.Store(id='session', storage_type='memory')], fullscreen=True),
     # dcc.Loading(children=[html.Div(id='session', style={'display':'none'})], fullscreen=True),
     sidebar,
     content
@@ -94,29 +94,28 @@ def render_page_content(pathname):
         if pathname == "/":
             # Can add more items to the list, for more content in homepage.
             return  html.Div([
-                        dcc.Loading(children=[
-                            # Welcome Header
-                            html.H1('Welcome to BEReddiT', style={'textAlign':'center'}),
 
-                            # Introduction Paragraph
+                        # Welcome Header
+                        html.H1('Welcome to BEReddiT', style={'textAlign':'center'}),
+
+                        # Introduction Paragraph
+                        html.Div([
+                            html.P('Add an Introduction here!', style={'textAlign':'center'})
+                        ], style=CENTER_STYLE),
+
+                        # Drop down menu for selecting SubReddit
+                        html.Div([
+                            html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
                             html.Div([
-                                html.P('Add an Introduction here!', style={'textAlign':'center'})
+                                dcc.Dropdown(
+                                    subreddits,
+                                    "computerscience",
+                                    id='data',
+                                )
                             ], style=CENTER_STYLE),
-
-                            # Drop down menu for selecting SubReddit
-                            html.Div([
-                                html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
-                                html.Div([
-                                    dcc.Dropdown(
-                                        subreddits,
-                                        "computerscience",
-                                        id='data',
-                                    )
-                                ], style=CENTER_STYLE),
-                                html.H3(id="homesubredditprinter", style=TEXT_STYLE),
-                                html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
-                            ])
-                        ], fullscreen=True)
+                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
+                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
+                        ])
                     ])
         
         ### Quick Facts Page
@@ -148,14 +147,35 @@ def render_page_content(pathname):
 
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
+    Output('session', 'data'),
     Output('homesubredditprinter', 'children'),
     Input('data', 'value')
 )
 def update_df(value):
     # Load the data
     df = get_df(value)
-    df.to_csv("temp.csv", index=False)
-    return f"Selected: {value}"
+    subreddit_df = get_df_description(value)
+
+    # Obtain description of the subreddit
+    description = subreddit_df.at[0, 'description']
+
+    # Posts Table
+    post_df = df[['post_id', 'post_title', 'post_body']].groupby('post_id', as_index=False, sort=False).first()
+    post_df.rename(columns={'post_id': 'Post Id', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
+
+    # Comments Table
+    comment_df = df[['post_id', 'comment_id', 'comment']].copy()
+    comment_df.rename(columns={'post_id': 'Post Id', 'comment_id': 'Comment Id', 'comment': 'Comment'}, inplace=True)
+
+    # Quick Facts Table
+    number_of_posts = len(post_df)
+    number_of_comments = len(df)
+    facts = [{
+        "Number of hot posts scraped": number_of_posts,
+        "Number of hot comments scraped": number_of_comments,
+        "Number of subscribers": subreddit_df.at[0, 'subscribers']
+    }]
+    return df.to_dict("records"), f"Selected: {value}"
 
 
 if __name__=='__main__':

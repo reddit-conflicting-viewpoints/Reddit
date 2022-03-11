@@ -13,7 +13,6 @@ PADDING_STYLE = {
 }
 
 layout =html.Div([
-            html.Div(id='relnone', style={'display': 'none'}),
             html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
             html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
             dbc.Card([
@@ -26,11 +25,11 @@ layout =html.Div([
 @callback(
     Output('relevance1', 'figure'),
     Output('relevancesubredditprinter', 'children'),
-    Input('relnone', 'children')
+    Input('session', 'data')
 )
 def update_graph(data):
     try:
-        df = pd.read_csv('temp.csv')
+        df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
         return px.histogram(df, x="comment_relevance", title=f'Comment Relevance Histogram (Subreddit: {subreddit})'), f'Subreddit: {subreddit}'
     except KeyError:
