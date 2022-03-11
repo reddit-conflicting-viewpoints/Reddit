@@ -1,6 +1,5 @@
 from dash import dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
-from app import global_store
 import pandas as pd
 import plotly.express as px
 
@@ -30,7 +29,7 @@ layout =html.Div([
 )
 def update_graph(data):
     try:
-        df = global_store(data['id'], data['subreddit'])
+        df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
         return px.histogram(df, x="comment_relevance", title=f'Comment Relevance Histogram (Subreddit: {subreddit})'), f'Subreddit: {subreddit}'
     except KeyError:
