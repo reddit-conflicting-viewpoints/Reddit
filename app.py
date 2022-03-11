@@ -18,12 +18,12 @@ app.title = "BEReddiT"
 server = app.server
 
 cache = Cache(app.server, config={
-    # 'CACHE_TYPE': 'redis',
+    'CACHE_TYPE': 'redis',
     # Note that filesystem cache doesn't work on systems with ephemeral
     # filesystems like Heroku.
     'CACHE_DIR': 'cache-directory',
-    'CACHE_TYPE': 'filesystem',
-    # 'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379'),
+    # 'CACHE_TYPE': 'filesystem',
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379'),
 
     # should be equal to maximum number of users on the app at a single time
     # higher numbers will store more data in the filesystem / redis cache
@@ -161,15 +161,15 @@ def render_page_content(pathname):
     # If the user tries to reach a different page, return a 404 message
     return html.H1('404: Page Not Found', style={'textAlign':'center'})
 
-# @cache.memoize()
+@cache.memoize()
 def global_store(session_id, value):
-    @cache.memoize()
-    def query_and_serialize_data(session_id, value):
-        df = get_df(value)
-        return df.to_json()
-    return pd.read_json(query_and_serialize_data(session_id, value))
-    # df = get_df(value)
-    # return df
+    # @cache.memoize()
+    # def query_and_serialize_data(session_id, value):
+    #     df = get_df(value)
+    #     return df.to_json()
+    # return pd.read_json(query_and_serialize_data(session_id, value))
+    df = get_df(value)
+    return df
 
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
