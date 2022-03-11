@@ -13,6 +13,7 @@ PADDING_STYLE = {
 }
 
 layout =html.Div([
+            html.Div(id='sentnone', style={'display': 'none'}),
             html.H1('Sentiment Analysis - Can we identify conflict with Sentiment?',style={'textAlign':'center'}),
             html.H3(id='sentimentsubredditprinter',style={'textAlign':'center'}),
             dbc.Card([
@@ -43,11 +44,11 @@ layout =html.Div([
     Output('sentiment2', 'figure'),
     Output('sentiment3', 'figure'),
     Output('sentimentsubredditprinter', 'children'),
-    Input('session', 'data')
+    Input('sentnone', 'children')
 )
 def update_graph(data):
     try:
-        df = pd.DataFrame(data)
+        df = pd.read_csv('temp.csv')
         subreddit = df.at[0, 'subreddit']
         return px.histogram(df, x="comment_sentiment"), px.box(df, x="comment_sentiment", y='comment_relevance'), px.box(df, x="post_id", y='comment_relevance'), f'Subreddit: {subreddit}'
     except KeyError:
