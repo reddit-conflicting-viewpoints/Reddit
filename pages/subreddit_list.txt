@@ -3,6 +3,7 @@ antiwork
 AskReddit
 askscience
 computerscience
+cscareerquestions
 datascience
 dating
 gaming
