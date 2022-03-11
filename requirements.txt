@@ -9,6 +9,7 @@ asyncpraw
 numpy
 matplotlib
 pandas
+scipy
 wordcloud
 dash
 dash-bootstrap-components
