@@ -3,19 +3,12 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 from pages.sas_key import get_df_description
+from pages.style import PADDING_STYLE
 
 TEXT_STYLE = {
     'textAlign':'center',
     'width': '70%',
     'margin': '0 auto',
-}
-
-PADDING_STYLE = {
-    'padding-top': '5px',
-    'padding-right': '5px',
-    'padding-bottom': '5px',
-    'padding-left': '5px',
-    'margin-bottom': '10px'
 }
 
 layout =html.Div([
