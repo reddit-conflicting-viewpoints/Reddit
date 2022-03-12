@@ -1,6 +1,5 @@
 AmItheAsshole
 antiwork
-AskReddit
 askscience
 computerscience
 cscareerquestions
