@@ -41,10 +41,10 @@ def update_graph(data):
         
         # Topic modeling for comments
         comm_topics_fig = px.bar(df.comment_topics.value_counts()[1:16],
-                            title='<b>Top 15</b> Important Topics For Comments',
-                            labels={'index':'Topics', 'value':'Count (Number of Comments)'})
+                                 title='<b>Top 15</b> Important Topics For Comments',
+                                 labels={'index':'Topics', 'value':'Count (Number of Comments)'})
         comm_topics_fig.update_layout(showlegend=False)
-        
+
         # Topic modeling for posts
         post_df = df[['post_topics', 'post_id']].groupby('post_topics', as_index=False).count()
         post_topics_fig = px.bar(post_df[1:16],

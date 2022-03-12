@@ -94,7 +94,7 @@ def update_graph(data):
                                            "orange": "orange"})
         comm_relevance_dist.update_layout(yaxis_title="Number of Comments", showlegend=False)
         comm_relevance_dist.add_vline(x=THRESHOLD, line_width=3, line_dash="dash", line_color="black")
-        
+
         # T-test
         test = stats.ttest_1samp(a=df.comment_relevance, popmean=THRESHOLD, alternative='less')
         if test.pvalue > 0.05:
