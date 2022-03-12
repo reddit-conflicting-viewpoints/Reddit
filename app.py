@@ -1,15 +1,15 @@
 # Code source: https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 import dash
-from dash import html, dcc, callback
+from dash import html, dcc, callback, dash_table
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.express as px
-from pages.sas_key import get_df
+from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
-from pages import relevance_page, topicmodeling_page, sentimentanalysis_page
+from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
 server = app.server
@@ -41,13 +41,19 @@ CONTENT_STYLE = {
 
 # Center of Div
 CENTER_STYLE = {
-    'width': '50%',
+    'width': '70%',
+    'margin': '0 auto',
+}
+
+TEXT_STYLE = {
+    'textAlign':'center',
+    'width': '70%',
     'margin': '0 auto',
 }
 
 sidebar = html.Div(
     [
-        html.H2("BEReddiT", className="display-4"),
+        html.H2("BEReddiT", className="display-5"),
         html.Hr(),
         html.P(
             "Visualization Dashboard", className="lead"
@@ -55,6 +61,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("Subreddit", href="/facts", active="exact"),
                 dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
@@ -99,13 +106,21 @@ def render_page_content(pathname):
                         # Drop down menu for selecting SubReddit
                         html.Div([
                             html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
-                            dcc.Dropdown(
-                                subreddits,
-                                "computerscience",
-                                id='data'
-                            )
-                        ], style=CENTER_STYLE)
+                            html.Div([
+                                dcc.Dropdown(
+                                    subreddits,
+                                    "computerscience",
+                                    id='data',
+                                )
+                            ], style=CENTER_STYLE),
+                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
+                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
+                        ])
                     ])
+        
+        ### Quick Facts Page
+        elif pathname == "/facts":
+            return facts_page.layout
 
         ### Relevance Page
         elif pathname == "/relevance":
@@ -124,7 +139,7 @@ def render_page_content(pathname):
     except NameError as e:
         print(e)
         return html.H1('No data loaded. Head to Home Page First!', style={'textAlign':'center'})
-    
+
 
     ### 404 Page
     # If the user tries to reach a different page, return a 404 message
@@ -133,11 +148,13 @@ def render_page_content(pathname):
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
     Output('session', 'data'),
+    Output('homesubredditprinter', 'children'),
     Input('data', 'value')
 )
 def update_df(value):
+    # Load the data
     df = get_df(value)
-    return df.to_dict("records")
+    return df.to_dict("records"), f"Selected: {value}"
 
 
 if __name__=='__main__':
