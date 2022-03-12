@@ -6,6 +6,7 @@ computerscience
 cscareerquestions
 datascience
 dating
+explainlikeimfive
 gaming
 geopolitics
 IllegalLifeProTips
@@ -15,7 +16,12 @@ loseit
 movies
 music
 NoStupidQuestions
+offmychest
+ProgrammingLanguages
+relationship_advice
 science
 Showerthoughts
 technology
+TooAfraidToAsk
 WorkReform
+YouShouldKnow
