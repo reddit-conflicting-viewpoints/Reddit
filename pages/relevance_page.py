@@ -32,7 +32,15 @@ layout =html.Div([
                     dash_table.DataTable(id="reltable", page_size=10,
                                      style_header={'font-weight': 'bold'},
                                      style_data={'whiteSpace': 'normal'},
-                                     style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
+                                     style_cell={
+                                             'font-family':'sans-serif',
+                                             'textAlign': 'left',
+                                             'font-size': '14px',
+                                             'padding-top': '3px',
+                                             'padding-bottom': '8px',
+                                             'padding-left': '8px',
+                                             'padding-right': '8px',
+                                         },
                                      style_data_conditional=[
                                          {
                                              'if': {
@@ -51,7 +59,7 @@ layout =html.Div([
                                          'selector': '.dash-spreadsheet td div',
                                          'rule': '''
                                              line-height: 15px;
-                                             max-height: 70px; min-height: 33px;
+                                             max-height: 75px; min-height: 33px;
                                              display: block;
                                              overflow-y: auto;
                                          '''
@@ -68,7 +76,7 @@ layout =html.Div([
                     html.P(f"One Sample t-test (Alternate Hypothesis: mean relevance < {THRESHOLD}):"),
                     html.P(id='relttest'),
                 ])
-            ])
+            ], style=PADDING_STYLE)
             ### End T-Test
         ]),
 
