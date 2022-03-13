@@ -21,9 +21,6 @@ layout =html.Div([
                 html.H5("Comment Relevance Histogram"),
                 dcc.Loading(children=[
                     dcc.Graph(id='relevance1'),
-                    html.P("Are the comments in the subreddit relevant to their posts?"),
-                    html.P(f"One Sample t-test (Alternate Hypothesis: mean relevance < {THRESHOLD}):"),
-                    html.P(id='relttest'),
                 ]),
             ], style=PADDING_STYLE),
             ### End Comment Relevence Histogram
@@ -61,8 +58,18 @@ layout =html.Div([
                                     }]
                     )
                 ]),
-            ], style=PADDING_STYLE)
+            ], style=PADDING_STYLE),
             ### End Comment Relevance Table
+    
+            ### T-Test
+            dbc.Card([
+                html.H5("Are the comments in the subreddit relevant to their posts?"),
+                dcc.Loading(children=[
+                    html.P(f"One Sample t-test (Alternate Hypothesis: mean relevance < {THRESHOLD}):"),
+                    html.P(id='relttest'),
+                ])
+            ])
+            ### End T-Test
         ]),
 
 @callback(
@@ -95,8 +102,15 @@ def update_graph(data):
         comm_relevance_dist.update_layout(yaxis_title="Number of Comments", showlegend=False)
         comm_relevance_dist.add_vline(x=THRESHOLD, line_width=3, line_dash="dash", line_color="black")
 
-        # T-test
+        # Hypothesis Test
         test = stats.ttest_1samp(a=df.comment_relevance, popmean=THRESHOLD, alternative='less')
+        # comment_relevance_scores = df.comment_relevance.to_numpy()
+        # print(comment_relevance_scores)
+        # print(np.median(comment_relevance_scores))
+        # comment_relevance_scores = comment_relevance_scores - np.median(comment_relevance_scores)
+        # print(comment_relevance_scores)
+        # test = stats.wilcoxon(x=comment_relevance_scores, alternative='less')
+        # print(test)
         if test.pvalue > 0.05:
             test_output = FAIL_TEST.format(pvalue=test.pvalue)
         else:

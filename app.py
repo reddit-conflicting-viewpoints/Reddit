@@ -7,7 +7,7 @@ import plotly.express as px
 from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
-from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page
+from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page, conflictingviewpoints_page
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
@@ -65,6 +65,7 @@ sidebar = html.Div(
                 dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
+                dbc.NavLink("Conflicting Viewpoints", href="/conflictingviewpoints", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -133,6 +134,11 @@ def render_page_content(pathname):
         ### Sentiment Page
         elif pathname == "/sentimentanalysis":
             return sentimentanalysis_page.layout
+
+        ### Conflicting Viewpoints Page
+        elif pathname == "/conflictingviewpoints":
+            return conflictingviewpoints_page.layout
+
     except ValueError as e:
         print(e)
         return html.H1('No data loaded. Head to Home Page First!', style={'textAlign':'center'})
