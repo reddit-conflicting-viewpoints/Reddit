@@ -2,6 +2,7 @@ from dash import dcc, html, Input, Output, callback, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
+import numpy as np
 from pages.sas_key import get_df_description
 from pages.style import PADDING_STYLE
 
@@ -16,20 +17,22 @@ layout =html.Div([
             html.H3(id="factssubredditprinter", style={'textAlign':'center'}),
             dbc.Card(style=PADDING_STYLE, children=[
                 html.H5("Subreddit Description"),
-                dcc.Loading(children=[
-                    html.P(id='subredditdescription', style=TEXT_STYLE),
-                ]),
-            ]),
-            dbc.Card([
-                html.H5("Subreddit Quick Facts", className="card-title"),
-                dcc.Loading(children=[
-                    # html.H5("Subreddit Quick Facts", style=TEXT_STYLE),
-                    dash_table.DataTable(id="subredditfacts",
-                                         style_header={'font-weight': 'bold'},
-                                         style_cell={'font-family':'sans-serif', 'font-size': '14px'},
-                                         style_data={'whiteSpace': 'normal', 'height': 'auto'}),
+                html.Div(className='row', children=[
+                    dcc.Loading(children=[
+                        ### Description
+                        html.Div(className="six columns", children=[
+                            html.P(id='subredditdescription', style=TEXT_STYLE),
+                        ]),
+                        ### Fact Table
+                        html.Div(className="six columns", children=[
+                            dash_table.DataTable(id="subredditfacts",
+                                                 style_header={'font-weight': 'bold'},
+                                                 style_cell={'font-family':'sans-serif', 'font-size': '14px', 'text-align': 'center'},
+                                                 style_data={'whiteSpace': 'normal', 'height': 'auto'})
+                        ])
+                    ]),
                 ])
-            ], style=PADDING_STYLE),
+            ]),
 
             ### Posts Table
             dbc.Card([
@@ -40,13 +43,22 @@ layout =html.Div([
                                          # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
-                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
                                          columns=[{'name': 'Post ID', 'id': 'Post ID'}, {'name': 'Post Title', 'id': 'Post Title'}, {'name': 'Post Body', 'id': 'Post Body'}],
+                                         style_cell={
+                                             'font-family':'sans-serif',
+                                             'textAlign': 'left',
+                                             'font-size': '14px',
+                                             'padding-top': '3px',
+                                             'padding-bottom': '8px',
+                                             'padding-bottom': '8px',
+                                             'padding-left': '8px',
+                                             'padding-right': '8px',
+                                         },
                                          css=[{
                                              'selector': '.dash-spreadsheet td div',
                                              'rule': '''
                                                  line-height: 15px;
-                                                 max-height: 70px; min-height: 33px;
+                                                 max-height: 75px; min-height: 33px;
                                                  display: block;
                                                  overflow-y: auto;
                                              '''
@@ -66,12 +78,21 @@ layout =html.Div([
                                          # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
-                                         style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
+                                         style_cell={
+                                             'font-family':'sans-serif',
+                                             'textAlign': 'left',
+                                             'font-size': '14px',
+                                             'padding-top': '3px',
+                                             'padding-bottom': '8px',
+                                             'padding-bottom': '8px',
+                                             'padding-left': '8px',
+                                             'padding-right': '8px',
+                                         },
                                          css=[{
                                              'selector': '.dash-spreadsheet td div',
                                              'rule': '''
                                                  line-height: 15px;
-                                                 max-height: 70px; min-height: 33px;
+                                                 max-height: 75px; min-height: 33px;
                                                  display: block;
                                                  overflow-y: auto;
                                              '''
@@ -159,43 +180,54 @@ def update_df(data):
         }]
 
         # Post Score Plot
-        posts_score_hist = px.histogram(post_df, 
-                                        x="post_score",
+        def reject_outliers(data, n=2.):
+            data = data[~np.isnan(data)]
+            d = np.abs(data - np.median(data))
+            mdev = np.median(d)
+            s = d/mdev if mdev else 0.
+            return data[s<n].flatten()
+        
+        post_scores = post_df['post_score'].to_numpy()
+        post_scores = reject_outliers(post_scores)
+        posts_score_hist = px.histogram(post_scores, 
                                         title='Frequency Distribution of Post Score',
-                                        labels={'score':'Score', 'count':'Number of Posts'},
+                                        labels={'value':'Score', 'count':'Number of Posts'},
                                         opacity=0.8,
                                         color_discrete_sequence=['indianred'],
                                         text_auto=True).update_layout(
-                                        yaxis_title="Number of Posts")
+                                        xaxis_title="Score", yaxis_title="Number of Posts", showlegend=False)
 
         # Comment Score Plot
-        comms_score_hist = px.histogram(df,                                
-                                x="comment_score",
-                                log_y=True,
-                                title='Frequency Distribution of Comment Score',
-                                opacity=0.8).update_layout(
-                                xaxis_title="Score", yaxis_title="Number of Comments (log scale)")
+        comment_scores = df['comment_score'].to_numpy()
+        comment_scores = reject_outliers(comment_scores)
+        comms_score_hist = px.histogram(comment_scores,
+                                        labels={'value':'Score'},
+                                        log_y=True,
+                                        title='Frequency Distribution of Comment Score',
+                                        opacity=0.8).update_layout(yaxis_title="Number of Comments (log scale)", showlegend=False)
 
         post_df['word_counts'] = post_df.post_title.str.cat(post_df.post_body, sep=" ").str.split().apply(len)
         df['word_counts'] = df.comment.astype(str).str.split().apply(len)
 
         # Post Word Count Distribution
-        post_word_count = px.histogram(post_df, 
-                                       x="word_counts",
+        post_word = post_df['word_counts'].to_numpy()
+        post_word = reject_outliers(post_word)
+        post_word_count = px.histogram(post_word, 
                                        title='Word-Count Distribution for Posts',
-                                       labels={'word_counts':'Word Count', 'count':'Number of Posts'},
+                                       labels={'value':'Word Count', 'count':'Number of Posts'},
                                        opacity=0.8,
                                        color_discrete_sequence=['indianred'],
                                        text_auto=True).update_layout(
-                                       yaxis_title="Number of Posts")
+                                       yaxis_title="Number of Posts", showlegend=False)
 
         # Comment Word Count Distribution
-        comms_word_count = px.histogram(df, 
-                           x="word_counts",
+        comment_word = df['word_counts'].to_numpy()
+        comment_word = reject_outliers(comment_scores)
+        comms_word_count = px.histogram(comment_word, 
                            log_y=True,
                            title='Word-Count Distribution for Comments',
                            opacity=0.8).update_layout(
-                           xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)")
+                           xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)", showlegend=False)
 
         post_df.rename(columns={'post_id': 'Post ID', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
         return f"Selected: {subreddit}", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
