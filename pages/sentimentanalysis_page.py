@@ -32,12 +32,12 @@ layout =html.Div([
             ### End of plot
 
             ### Box Plot sentiment vs post_relevance
-            dbc.Card([
-                html.H5("Sentiment vs Post Relevance"),
-                dcc.Loading(children=[
-                    dcc.Graph(id='sent3'),
-                ]),
-            ], style=PADDING_STYLE),
+            # dbc.Card([
+            #     html.H5("Sentiment vs Post Relevance"),
+            #     dcc.Loading(children=[
+            #         dcc.Graph(id='sent3'),
+            #     ]),
+            # ], style=PADDING_STYLE),
             ### End Box Plot
         ])
 
@@ -45,7 +45,7 @@ layout =html.Div([
     Output('sentimentsubredditprinter', 'children'),
     Output('sent1', 'figure'),
     Output('sent2', 'figure'),
-    Output('sent3', 'figure'),
+    # Output('sent3', 'figure'),
     Input('session', 'data')
 )
 def update_graph(data):
@@ -53,7 +53,7 @@ def update_graph(data):
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
 
-        # Post Sentiment
+        # figure 1: Post Sentiment
         post_df = df[['post_id', 'post_sentiment']].groupby('post_id', as_index=False, sort=False).first()
         post_df["color"] = np.select(
             [post_df["post_sentiment"].eq(5), post_df["post_sentiment"].eq(1)],
@@ -72,6 +72,7 @@ def update_graph(data):
                                      }).update_layout(
                                      xaxis_title="Sentiment", yaxis_title="Number of Posts", showlegend=False)
 
+        # figure 2
         df["color"] = np.select(
             [df["comment_sentiment"].eq(5), df["comment_sentiment"].eq(1)],
             ["green", "red"],
@@ -89,10 +90,11 @@ def update_graph(data):
                                         }).update_layout(
                                         xaxis_title="Sentiment", yaxis_title="Number of Comments", showlegend=False)
 
+        # figure 3
         post_df2 = df[['post_id', 'post_sentiment', 'comment_relevance']].groupby('post_id', as_index=False, sort=False).agg({'post_sentiment': 'first', 'comment_relevance': 'mean'})
         box_plot = px.box(post_df2, x="post_sentiment", y='comment_relevance').update_layout(xaxis_title="Sentiment", yaxis_title="Post Relevance", showlegend=False)
 
-        return f'Subreddit: {subreddit}', post_sent_fig, comment_sent_fig, box_plot
+        return f'Subreddit: {subreddit}', post_sent_fig, comment_sent_fig
     except KeyError as e:
         print(e)
-        return 'No data loaded! Go to Home Page first!', {}, {}, {}
+        return 'No data loaded! Go to Home Page first!', {}, {}
