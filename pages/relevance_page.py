@@ -8,9 +8,15 @@ from pages.style import PADDING_STYLE
 
 THRESHOLD = 0.5
 
-PASS_TEST = """The p-value obtained is {pvalue:.2f}. This is less than 0.05, and therefore we conclude that there is enough evidence to support that the comments are not relevant to their posts."""
+PASS_TEST = """
+The p-value obtained is {pvalue:.2f}. The p-value is less than our significance level of 0.10.  
+**Therefore, we conclude that there is enough evidence to support that the comments are not relevant to their posts.**
+"""
 
-FAIL_TEST = """The p-value obtained is {pvalue:.2f}. This is greater than 0.05, and therefore we conclude that there is not enough evidence to support that the comments are not relevant to their posts."""
+FAIL_TEST = """
+The p-value obtained is {pvalue:.2f}. The p-value is greater than our significance level of 0.10.  
+**Therefore, we conclude that there is not enough evidence to support that the comments are not relevant to their posts.**
+"""
 
 layout =html.Div([
             html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
@@ -73,8 +79,9 @@ layout =html.Div([
             dbc.Card([
                 html.H5("Are the comments in the subreddit relevant to their posts?"),
                 dcc.Loading(children=[
-                    html.P(f"One Sample t-test (Alternate Hypothesis: mean relevance < {THRESHOLD}):"),
-                    html.P(id='relttest'),
+                    html.P(f"Wilcoxon test for difference of medians (Alternate Hypothesis: subreddit median relevance < {THRESHOLD}):"),
+                    html.P(f"Conducting test with 0.10 significance level"),
+                    dcc.Markdown(id='relttest'),
                 ])
             ], style=PADDING_STYLE)
             ### End T-Test
@@ -111,15 +118,11 @@ def update_graph(data):
         comm_relevance_dist.add_vline(x=THRESHOLD, line_width=3, line_dash="dash", line_color="black")
 
         # Hypothesis Test
-        test = stats.ttest_1samp(a=df.comment_relevance, popmean=THRESHOLD, alternative='less')
-        # comment_relevance_scores = df.comment_relevance.to_numpy()
-        # print(comment_relevance_scores)
-        # print(np.median(comment_relevance_scores))
-        # comment_relevance_scores = comment_relevance_scores - np.median(comment_relevance_scores)
-        # print(comment_relevance_scores)
-        # test = stats.wilcoxon(x=comment_relevance_scores, alternative='less')
-        # print(test)
-        if test.pvalue > 0.05:
+        # test = stats.ttest_1samp(a=df.comment_relevance, popmean=THRESHOLD, alternative='less')
+        comment_relevance_scores = df.comment_relevance.to_numpy()
+        comment_relevance_scores = comment_relevance_scores - THRESHOLD
+        test = stats.wilcoxon(x=comment_relevance_scores, alternative='less')
+        if test.pvalue > 0.1:
             test_output = FAIL_TEST.format(pvalue=test.pvalue)
         else:
             test_output = PASS_TEST.format(pvalue=test.pvalue)
