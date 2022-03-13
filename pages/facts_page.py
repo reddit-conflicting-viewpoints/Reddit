@@ -3,19 +3,12 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 from pages.sas_key import get_df_description
+from pages.style import PADDING_STYLE
 
 TEXT_STYLE = {
     'textAlign':'center',
     'width': '70%',
     'margin': '0 auto',
-}
-
-PADDING_STYLE = {
-    'padding-top': '5px',
-    'padding-right': '5px',
-    'padding-bottom': '5px',
-    'padding-left': '5px',
-    'margin-bottom': '10px'
 }
 
 layout =html.Div([
@@ -48,7 +41,7 @@ layout =html.Div([
                                          style_header={'font-weight': 'bold'},
                                          style_data={'whiteSpace': 'normal'},
                                          style_cell={'font-family':'sans-serif', 'textAlign': 'left', 'font-size': '14px'},
-                                         columns=[{'name': 'post_id', 'id': 'post_id'}, {'name': 'post_title', 'id': 'post_title'}, {'name': 'post_body', 'id': 'post_body'}],
+                                         columns=[{'name': 'Post ID', 'id': 'Post ID'}, {'name': 'Post Title', 'id': 'Post Title'}, {'name': 'Post Body', 'id': 'Post Body'}],
                                          css=[{
                                              'selector': '.dash-spreadsheet td div',
                                              'rule': '''
@@ -204,6 +197,7 @@ def update_df(data):
                            opacity=0.8).update_layout(
                            xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)")
 
+        post_df.rename(columns={'post_id': 'Post ID', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
         return f"Selected: {subreddit}", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
     except KeyError as e:
         print(e)
