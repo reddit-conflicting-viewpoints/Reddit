@@ -9,7 +9,11 @@ from pages.visualize import *
 import pandas as pd
 from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page, conflictingviewpoints_page
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'], suppress_callback_exceptions=True)
+# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED, 'https://codepen.io/chriddyp/pen/bWLwgP.css'],
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED],
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, initial-scale=1"},
+    ], suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
 server = app.server
@@ -29,7 +33,6 @@ SIDEBAR_STYLE = {
     "bottom": 0,
     "width": "16rem",
     "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
 }
 
 # padding for the page content
@@ -56,7 +59,7 @@ sidebar = html.Div(
         html.H2("BEReddiT", className="display-5"),
         html.Hr(),
         html.P(
-            "Visualization Dashboard", className="lead"
+            "The TSAR System", className="lead"
         ),
         dbc.Nav(
             [
@@ -79,7 +82,6 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 app.layout = html.Div([
     dcc.Location(id="url"),
     dcc.Loading(children=[dcc.Store(id='session', storage_type='memory')], fullscreen=True),
-    # dcc.Loading(children=[html.Div(id='session', style={'display':'none'})], fullscreen=True),
     sidebar,
     content
 ])
@@ -89,35 +91,56 @@ app.layout = html.Div([
     Output("page-content", "children"),
     [Input("url", "pathname")]
 )
+
 def render_page_content(pathname):
     try:
         ### Home Page
         if pathname == "/":
             # Can add more items to the list, for more content in homepage.
-            return  html.Div([
+            return  html.Div([dbc.Container(
+                                            [
+                                                html.H1("The Topic-Sentiment Anlysis with Relevance (TSAR) System", className="display-3"),
+                                                html.P(
+                                                    "Introduction Paragraph "
+                                                    "featured content or information.",
+                                                    className="lead",
+                                                ),
+                                                html.Hr(className="my-2"),
+                                                html.P(
+                                                    "Use utility classes for typography and spacing to suit the "
+                                                    "larger container."
+                                                ),
+                                                html.P(
+                                                    dbc.Button("GitHub", color="primary"), className="lead"
+                                                ),
+                                            ],
+                                            fluid=True,
+                                            className="py-3",
+                                            ),         
 
-                        # Welcome Header
-                        html.H1('Welcome to BEReddiT', style={'textAlign':'center'}),
-
-                        # Introduction Paragraph
-                        html.Div([
-                            html.P('Add an Introduction here!', style={'textAlign':'center'})
-                        ], style=CENTER_STYLE),
-
-                        # Drop down menu for selecting SubReddit
-                        html.Div([
-                            html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
-                            html.Div([
-                                dcc.Dropdown(
-                                    subreddits,
-                                    "computerscience",
-                                    id='data',
-                                )
-                            ], style=CENTER_STYLE),
-                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
-                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
-                        ])
-                    ])
+# dbc.DropdownMenu(
+#     label="Menu",
+#     children=[
+#         dbc.DropdownMenuItem("Item 1"),
+#         dbc.DropdownMenuItem("Item 2"),
+#         dbc.DropdownMenuItem("Item 3"),
+#     ],
+# )
+                            # Drop down menu for selecting SubReddit
+                            # dbc.Container(
+                                            html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
+                                            html.Div([
+                                                dbc.DropdownMenu(
+                                                    children = [dbc.DropdownMenuItem(item) for item in subreddits].extend(dbc.DropdownMenuItem("computerscience", active=True)),
+                                                    id="data",                                                    
+                                                )
+                                            ]),
+                                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
+                                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
+                                            
+                                        # )          
+                            ])
+                    ######################TODO: Sai ^################
         
         ### Quick Facts Page
         elif pathname == "/facts":
@@ -160,7 +183,7 @@ def render_page_content(pathname):
 def update_df(value):
     # Load the data
     df = get_df(value)
-    return df.to_dict("records"), f"Selected: {value}"
+    return df.to_dict("records"), f"r/{value}"
 
 
 if __name__=='__main__':

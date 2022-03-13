@@ -228,7 +228,7 @@ def update_df(data):
                            xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)", showlegend=False)
 
         post_df.rename(columns={'post_id': 'Post ID', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
-        return f"Selected: {subreddit}", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
+        return f"r/{subreddit}", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', "", [], [], {}, {}, {}, {}
