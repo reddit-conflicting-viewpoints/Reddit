@@ -9,14 +9,6 @@ layout =html.Div([
             html.H1('Topic Modeling - What are posts talking about?',style={'textAlign':'center'}),
             html.H3(id='topicsubredditprinter', style={'textAlign':'center'}),
     
-            ### Comment Topic Modeling
-            dbc.Card([
-                html.H5("Comment Topic Modeling"),
-                dcc.Loading(children=[
-                    dcc.Graph(id='topic1'),
-                ]),
-            ], style=PADDING_STYLE),
-            ### End Comment Topic Modeling
             ### Post Topic Modeling
             dbc.Card([
                 html.H5("Post Topic Modeling"),
@@ -25,6 +17,15 @@ layout =html.Div([
                 ]),
             ], style=PADDING_STYLE),
             ### End Post Topic Modeling
+            ### Comment Topic Modeling
+            dbc.Card([
+                html.H5("Comment Topic Modeling"),
+                dcc.Loading(children=[
+                    dcc.Graph(id='topic1'),
+                ]),
+            ], style=PADDING_STYLE),
+            ### End Comment Topic Modeling
+            
         ])
 
 @callback(
@@ -40,6 +41,8 @@ def update_graph(data):
         subreddit = df.at[0, 'subreddit']
         
         # Topic modeling for comments
+        df.dropna(inplace=True)
+        df['comment_topics'] = df['comment_topics'].apply(lambda s: ' '.join(s.split('_')[1:]))
         comm_topics_fig = px.bar(df.comment_topics.value_counts()[1:16],
                                  title='<b>Top 15</b> Important Topics For Comments',
                                  labels={'index':'Topics', 'value':'Count (Number of Comments)'})
@@ -47,6 +50,7 @@ def update_graph(data):
 
         # Topic modeling for posts
         post_df = df[['post_topics', 'post_id']].groupby('post_topics', as_index=False).count()
+        post_df['post_topics'] = post_df['post_topics'].apply(lambda s: ' '.join(s.split('_')[1:]))
         post_topics_fig = px.bar(post_df[1:16],
                                  x='post_topics',
                                  y='post_id',
