@@ -1,4 +1,5 @@
 from dash import dcc, html, Input, Output, callback
+from .visualize import *
 import dash_bootstrap_components as dbc
 
 import plotly.express as px
@@ -46,51 +47,41 @@ def update_graph(data):
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
 
-        # figure 1: Post Sentiment
-        post_df = df[['post_id', 'post_sentiment']].groupby('post_id', as_index=False, sort=False).first()
-        post_df["color"] = np.select(
-            [post_df["post_sentiment"].eq(5), post_df["post_sentiment"].eq(1)],
-            ["green", "red"],
-            "blue"
-        )
-        post_sent_fig = px.histogram(post_df, 
-                                     x="post_sentiment",
-                                     title='Sentiment Distribution for Posts',
-                                     text_auto=True, 
-                                     color="color",
-                                     color_discrete_map={
-                                         "green": "green",
-                                         "red": "red",
-                                         "blue": "blue"
-                                     }).update_layout(
-                                     xaxis_title="Sentiment", yaxis_title="Number of Posts", showlegend=False)
+        # figure 1: 
+        df['sentiment_diff'] = df['comment_sentiment'] - df['post_sentiment']
 
-        # figure 2
-        df = pd.DataFrame(data)
-        subreddit = df.at[0, 'subreddit']
-       
-        df["color"] = np.select(
-            [df["comment_sentiment"].eq(5), df["comment_sentiment"].eq(1)],
-            ["green", "red"],
-            "blue"
-        )
-        comment_sent_fig = px.histogram(df, 
-                                        x="comment_sentiment",
-                                        title='Sentiment Distribution for Comments',
-                                        text_auto=True,
-                                        color="color",
-                                        color_discrete_map={
-                                            "green": "green",
-                                            "red": "red",
-                                            "blue": "blue"
-                                        }).update_layout(
-                                        xaxis_title="Sentiment", yaxis_title="Number of Comments", showlegend=False)
+        fig1_df = df[['comment_topics', 'comment_relevance', 'sentiment_diff']].groupby('comment_topics', as_index=False).agg(['mean', 'size']).reset_index()
+        fig1_df = fig1_df.droplevel(1, axis=1)
+        cols = ['comment_topics', 'comment_relevance_mean', 'comment_relevance_size', 'sentiment_diff_mean', 'sentiment_diff_size']
+        fig1_df.columns = cols
+        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title=df.iloc[0]['subreddit'], hover_name='comment_topics', labels={
+                     "sentiment_diff_mean": "Controversy",
+                     "comment_relevance_mean": "Comment Relevance"
+                 })
+        
+        # figure 2 TODO:choose a post id
+        post_id_here = df['post_id'].iloc[0]
+        sentiment_avgs = []
+        for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
+            sentiment_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_sentiment'].mean())
+        
+        comment_series_1_plot = px.line(sentiment_avgs, labels={
+                     "index": "Number of Comments",
+                     "value": "Average Comment Sentiment",
+                     "variable": "Average Comment Sentiment"
+                 }, title=df[df['post_id'] == post_id_here].iloc[0]['post_title'] + '-' + df.iloc[0]['subreddit'])
+
+        # relevance_avgs = []
+        # for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
+        #     relevance_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_relevance'].mean())
 
         # figure 3
-        post_df2 = df[['post_id', 'post_sentiment', 'comment_relevance']].groupby('post_id', as_index=False, sort=False).agg({'post_sentiment': 'first', 'comment_relevance': 'mean'})
-        box_plot = px.box(post_df2, x="post_sentiment", y='comment_relevance').update_layout(xaxis_title="Sentiment", yaxis_title="Post Relevance", showlegend=False)
-
-        return f'Subreddit: {subreddit}', post_sent_fig, comment_sent_fig, box_plot
+        controversy_comment_topic_plot = cv_plot('bar',df[['comment_topics', 'sentiment_diff']].groupby('comment_topics').mean().reset_index().sort_values(by='sentiment_diff'), x_col='comment_topics', y_col='sentiment_diff', title=df.iloc[0]['subreddit'], labels={
+                     "sentiment_diff": "Controversy",
+                     "comment_topics": "Comment Topic"
+                 }, width=1000, height=800)
+        
+        return f'Subreddit: {subreddit}', controversy_relevance_plot, comment_series_1_plot, controversy_comment_topic_plot
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, {}, {}
