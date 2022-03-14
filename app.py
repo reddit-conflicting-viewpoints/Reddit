@@ -8,6 +8,7 @@ import plotly.express as px
 from pages.sas_key import get_df, get_df_description
 from pages.visualize import *
 import pandas as pd
+import json
 from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page, conflictingviewpoints_page
 
 app = dash.Dash(__name__, 
@@ -58,6 +59,10 @@ TEXT_STYLE = {
     'background-color': 'AliceBlue',
     'color': 'Blue'
 }
+
+
+with open('pages/fig.json', 'r') as f:
+    subreddit_fig = json.load(f)
 
 sidebar = html.Div(
     [
@@ -111,7 +116,7 @@ def render_page_content(pathname):
                         html.Div([
                             html.H4('Our aim is to find ways to identify and discover conflicting viewpoints in online social forums/discussions (subreddits) using topic modeling, sentiment analysis and by measuring relevance of material within these discussions.', className="display-6 text-center"),
                             html.Hr(),
-                           ]),                        
+                           ]),
                         html.Div([
                             dbc.Card(
                                 dbc.CardBody(
@@ -129,6 +134,10 @@ def render_page_content(pathname):
                                     )
                         ]),
                         html.Hr(),
+                        ### Figure for subreddit scatter plot
+                        dcc.Loading(children=[
+                            dcc.Graph(figure=subreddit_fig),
+                        ]),
                         html.Div([
 
                             html.H6('What is the TSAR System?', className = 'display-6'),
