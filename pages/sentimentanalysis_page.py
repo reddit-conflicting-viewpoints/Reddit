@@ -205,6 +205,7 @@ def display_post(data, active_cell):
     df = pd.DataFrame(data)
     selected = df[df['post_id'] == active_cell['row_id']]
     selected = selected[['post_id', 'post_title', 'post_body']].groupby('post_id').first()
+    selected.rename(columns={'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
 
     table = dash_table.DataTable(selected.to_dict('records'), page_size=5,
                                  style_header={'font-weight': 'bold'},
