@@ -109,7 +109,7 @@ layout =html.Div([
             ### Score Frequency Plots
             dbc.Card([
                 html.H5("Popularity", className="card-title"),
-                html.P('Score indicates the total number of upvotes for a submission (post/comment), hence showing us Popularity.', className = 'card-subtitle'),
+                html.P('Score indicates the net total upvotes versus downvotes for a submission (post/comment), hence showing us Popularity.', className = 'card-subtitle'),
                 html.Div(className='row', children=[
                     dcc.Loading(children=[
                         html.Div([

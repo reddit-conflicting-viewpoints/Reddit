@@ -8,9 +8,13 @@ from pages.style import PADDING_STYLE
 
 
 layout =html.Div([
-            html.H1('Sentiment Analysis - Can we identify conflict with Sentiment?',style={'textAlign':'center'}),
-            html.H3(id='sentimentsubredditprinter',style={'textAlign':'center'}),
+            html.H1('Sentiment Analysis',style={'textAlign':'center'}),
 
+            html.Div([
+                html.H3("Let's identify conflict with Sentiment", className="display-6 text-center"),
+                html.H3(id='sentimentsubredditprinter',className='fs-4 text-center'),
+                html.Hr(),
+            ]), 
             ### Sentiment post and comment Distribution Plots
             dbc.Card([
                 html.H5("Sentiment Distribution", className="card-title"),
@@ -47,20 +51,38 @@ layout =html.Div([
                                              'padding-left': '8px',
                                              'padding-right': '8px',
                                          },
-                                     # style_data_conditional=[
-                                     #     {
-                                     #         'if': {
-                                     #             'filter_query': '{Comment Sentiment} >= 0.5',
-                                     #         },
-                                     #         'backgroundColor': 'lightgreen',
-                                     #     },
-                                     #     {
-                                     #         'if': {
-                                     #             'filter_query': '{Comment Sentiment} < 0.5',
-                                     #         },
-                                     #         'backgroundColor': '#FFB6C1',
-                                     #     }
-                                     # ],
+                                     style_data_conditional=[
+                                         {
+                                             'if': {
+                                                 'filter_query': '{Comment Sentiment} = 5',
+                                             },
+                                             'backgroundColor': '#91ff78',
+                                         },
+                                                                                  {
+                                             'if': {
+                                                 'filter_query': '{Comment Sentiment} = 4',
+                                             },
+                                             'backgroundColor': '#ddffb6',
+                                         },
+                                        {
+                                             'if': {
+                                                 'filter_query': '{Comment Sentiment} = 3',
+                                             },
+                                             'backgroundColor': '#b6d7ff',
+                                         },
+                                        {
+                                             'if': {
+                                                 'filter_query': '{Comment Sentiment} = 2',
+                                             },
+                                             'backgroundColor': '#f9b6ff',
+                                         },
+                                         {
+                                             'if': {
+                                                 'filter_query': '{Comment Sentiment} = 1',
+                                             },
+                                             'backgroundColor': '#FFB6C1',
+                                         }
+                                     ],
                                      css=[{
                                          'selector': '.dash-spreadsheet td div',
                                          'rule': '''
@@ -90,8 +112,8 @@ def update_graph(data):
         # figure 1: Post Sentiment
         post_df = df[['post_id', 'post_sentiment']].groupby('post_id', as_index=False, sort=False).first()
         post_df["color"] = np.select(
-            [post_df["post_sentiment"].eq(5), post_df["post_sentiment"].eq(1)],
-            ["green", "red"],
+            [post_df["post_sentiment"].eq(5), post_df["post_sentiment"].eq(4), post_df["post_sentiment"].eq(2), post_df["post_sentiment"].eq(1)],
+            ["green", "lightgreen", "orange", "red"],
             "blue"
         )
         post_sent_fig = px.histogram(post_df, 
@@ -100,17 +122,19 @@ def update_graph(data):
                                      text_auto=True, 
                                      color="color",
                                      color_discrete_map={
-                                         "green": "green",
-                                         "red": "red",
-                                         "blue": "blue"
+                                         "green": "#91ff78",
+                                         "lightgreen": "#ddffb6",
+                                         "orange": "#f9b6ff",
+                                         "red": "#FFB6C1",
+                                         "blue": "#b6d7ff"
                                      }).update_layout(
                                      xaxis_title="Sentiment", yaxis_title="Number of Posts", showlegend=False)
 
         # figure 2
         df.dropna(inplace=True, subset=['comment_sentiment'])
         df["color"] = np.select(
-            [df["comment_sentiment"].eq(5), df["comment_sentiment"].eq(1)],
-            ["green", "red"],
+            [df["comment_sentiment"].eq(5), df["comment_sentiment"].eq(4), df["comment_sentiment"].eq(2), df["comment_sentiment"].eq(1)],
+            ["green", "lightgreen", "orange", "red"],
             "blue"
         )
         comment_sent_fig = px.histogram(df, 
@@ -119,9 +143,11 @@ def update_graph(data):
                                         text_auto=True,
                                         color="color",
                                         color_discrete_map={
-                                            "green": "green",
-                                            "red": "red",
-                                            "blue": "blue"
+                                        "green": "#91ff78",
+                                         "lightgreen": "#ddffb6",
+                                         "orange": "#f9b6ff",
+                                         "red": "#FFB6C1",
+                                         "blue": "#b6d7ff"
                                         }).update_layout(
                                         xaxis_title="Sentiment", yaxis_title="Number of Comments", showlegend=False)
 
@@ -146,7 +172,7 @@ def update_graph(data):
         comment_df = df[['comment', 'comment_sentiment']].copy()
 
         comment_df.rename(columns={'comment': 'Comment', 'comment_sentiment': 'Comment Sentiment'}, inplace=True)
-        return f'Subreddit: {subreddit}', post_sent_fig, comment_sent_fig, comment_df.to_dict('records')
+        return f"Let's look at the sentiments of posts and comments in r/{subreddit} to see if we can identify conflict of interests with respect to comments and their posts. Here, sentiments are labeled on a scale of 1-5: 1 being negative sentiments, 3 being neutral and 5 being positive sentiments. Usually negative sentiments are the ones that project conflict.", post_sent_fig, comment_sent_fig, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, {}, []
