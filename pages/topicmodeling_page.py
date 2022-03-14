@@ -6,9 +6,12 @@ from pages.style import PADDING_STYLE
 
 
 layout =html.Div([
-            html.H1('Topic Modeling - What are posts talking about?',style={'textAlign':'center'}),
-            html.H3(id='topicsubredditprinter', style={'textAlign':'center'}),
-
+            html.H1('Topic Modeling',style={'textAlign':'center'}),
+            html.Div([
+                html.H3("What are people talking about here?", className="display-6 text-center"),
+                html.P(id='topicsubredditprinter', className='fs-4 text-center'),
+                html.Hr(),
+            ]), 
             dbc.Card(style=PADDING_STYLE, children=[
                 html.H5("List of Topics"),
                 html.Div(className='row', children=[
@@ -95,7 +98,7 @@ def update_graph(data):
         list_of_post_topics = pd.DataFrame(list_of_post_topics, columns=['Post Topics']).sort_values(by=['Post Topics'])
         list_of_comment_topics = pd.DataFrame(list_of_comment_topics, columns=['Comment Topics']).sort_values(by=['Comment Topics'])
 
-        return f'Subreddit: {subreddit}', comm_topics_fig, post_topics_fig, list_of_post_topics.to_dict('records'), list_of_comment_topics.to_dict('records')
+        return f'Here we can see what the most prominent topics of discussion are in current comments and posts of r/{subreddit}. Topics are listed as groups of words found to be most occuring together and most related within current discussions.', comm_topics_fig, post_topics_fig, list_of_post_topics.to_dict('records'), list_of_comment_topics.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, {}, [], []
