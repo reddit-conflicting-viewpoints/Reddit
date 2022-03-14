@@ -18,7 +18,7 @@ layout =html.Div([
             html.H1('Subreddit Information',style={'textAlign':'center'}),
             html.Div([
                 html.H3(id="factssubredditprinter", className="display-6 text-center"),
-                html.P('Here, you can check out more in formation about the subreddit. A snapshot of posts and their comments can be previewed along with the popularity and size of the subreddit selected. We have collected data on about 1,000 most recent posts and about 10,000 comments categorized as "hot" by Reddit for each subreddit. Comment threads can be as long as a 100 comments per post due to API limitations.', className = 'fs-4 text-center'),
+                html.P('Here, you can check out more in formation about the subreddit. A snapshot of posts and their comments can be previewed along with the popularity and size of the subreddit selected. We have collected data on about 1,000 most recent posts and about 10,000 comments categorized as "hot" by Reddit for each subreddit (this might vary accordingly as posts/commets that were removed or deleted are not included in our analysis). Comment threads can be as long as a 100 comments per post due to API limitations.', className = 'fs-4 text-center'),
                 html.Hr(),
             ]), 
             dbc.Card(style=PADDING_STYLE, children=[

@@ -7,15 +7,21 @@ import scipy.stats as stats
 from pages.style import PADDING_STYLE
 
 THRESHOLD = 0.5
-
+TEXT_STYLE = {
+    'textAlign':'center',
+    'width': '70%',
+    'margin': '0 auto',
+    'background-color': 'AliceBlue',
+    'color': 'Blue'
+}
 PASS_TEST = """
 The p-value obtained is {pvalue:.2f}. The p-value is less than our significance level of 0.10.  
-**Therefore, we conclude that there is enough evidence to support that the comments are not relevant to their posts.**
+**Hence, we conclude that there `is` enough evidence to support that the comments are not relevant to their posts.**
 """
 
 FAIL_TEST = """
 The p-value obtained is {pvalue:.2f}. The p-value is greater than our significance level of 0.10.  
-**Therefore, we conclude that there is not enough evidence to support that the comments are not relevant to their posts.**
+**Hence, we conclude that there `is not` enough evidence to support that the comments are not relevant to their posts.**
 """
 
 layout =html.Div([
@@ -27,7 +33,8 @@ layout =html.Div([
             ]), 
             ### Comment Relevance Histogram Distribution and T-Test
             dbc.Card([
-                html.H5("Comment Relevance Histogram", className = 'card-title'),
+                html.H5("Does this Subreddit have relevant discussion?", className = 'card-title'),
+                html.P('This histogram shows us the frequency distribution of relevance scores across all comments in this subreddit.', className = 'card-subtitle'),
                 dcc.Loading(children=[
                     dcc.Graph(id='relevance1'),
                 ]),
@@ -36,7 +43,9 @@ layout =html.Div([
 
             ### Comment Relevance Table
             dbc.Card([
-                html.H5("Comment Relevance Table"),
+                html.H5("Comment Relevance Preview", className = 'card-title'),
+                html.P('Check out how relevance scores reflect on a more granular level by looking at relevance scores for each comment with respect to their posts.', className = 'card-subtitle'),
+                html.P("Click on a comment to see which post it refers to below.", style=TEXT_STYLE),
                 dcc.Loading(children=[
                     dash_table.DataTable(id="reltable", page_size=10,
                                      style_header={'font-weight': 'bold'},
@@ -80,10 +89,10 @@ layout =html.Div([
     
             ### T-Test
             dbc.Card([
-                html.H5("Are the comments in the subreddit relevant to their posts?"),
+                html.H5("So, are the comments in this subreddit relevant to their posts?"),
                 dcc.Loading(children=[
-                    html.P(f"Wilcoxon test for difference of medians (Alternate Hypothesis: subreddit median relevance < {THRESHOLD}):"),
-                    html.P(f"Conducting test with 0.10 significance level"),
+                    html.P(f"We use the Wilcoxon test for difference of medians to determine this. (Alternate Hypothesis: subreddit median relevance < {THRESHOLD}):"),
+                    html.P(f"*Conducting test with 0.10 significance level"),
                     dcc.Markdown(id='relttest'),
                 ])
             ], style=PADDING_STYLE)
