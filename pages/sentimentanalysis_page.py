@@ -7,6 +7,14 @@ import scipy.stats as stats
 from pages.style import PADDING_STYLE
 
 
+TEXT_STYLE = {
+    'textAlign':'center',
+    'width': '70%',
+    'margin': '0 auto',
+    'background-color': 'AliceBlue',
+    'color': 'Blue'
+}
+
 layout =html.Div([
             html.H1('Sentiment Analysis',style={'textAlign':'center'}),
 
@@ -18,6 +26,7 @@ layout =html.Div([
             ### Sentiment post and comment Distribution Plots
             dbc.Card([
                 html.H5("Sentiment Distribution", className="card-title"),
+                html.P('Sentiments of the post set the tone of discussion for the subreddit and comment sentiments show how users might be responding to that tone.', className = 'card-subtitle'),
                 html.Div(className='row', children=[
                     dcc.Loading(children=[
                         html.Div([
@@ -38,6 +47,8 @@ layout =html.Div([
 
             dbc.Card([
                 html.H5("Comment Sentiment Table"),
+                html.P('Check out how those sentiments reflect on a more granular level by looking at sentiment scores for each comment.', className = 'card-subtitle'),
+                html.P("Click on a comment to see which post it refers to below.", style=TEXT_STYLE),
                 dcc.Loading(children=[
                     dash_table.DataTable(id="senttable", page_size=10,
                                      style_header={'font-weight': 'bold'},

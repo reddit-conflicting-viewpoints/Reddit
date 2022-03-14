@@ -19,12 +19,15 @@ The p-value obtained is {pvalue:.2f}. The p-value is greater than our significan
 """
 
 layout =html.Div([
-            html.H1('Relevance - Are the comments in discussions relevant to the submission?',style={'textAlign':'center'}),
-            html.H3(id="relevancesubredditprinter", style={'textAlign':'center'}),
-
+            html.H1('Relevance',style={'textAlign':'center'}),
+            html.Div([
+                html.H3("Are the comments in discussions relevant to the submission?", className="display-6 text-center"),
+                html.P(id='relevancesubredditprinter',className='fs-4 text-center'),
+                html.Hr(),
+            ]), 
             ### Comment Relevance Histogram Distribution and T-Test
             dbc.Card([
-                html.H5("Comment Relevance Histogram"),
+                html.H5("Comment Relevance Histogram", className = 'card-title'),
                 dcc.Loading(children=[
                     dcc.Graph(id='relevance1'),
                 ]),
@@ -52,13 +55,13 @@ layout =html.Div([
                                              'if': {
                                                  'filter_query': '{Comment Relevance} >= 0.5',
                                              },
-                                             'backgroundColor': 'lightgreen',
+                                             'backgroundColor': '#80ff59',
                                          },
                                          {
                                              'if': {
                                                  'filter_query': '{Comment Relevance} < 0.5',
                                              },
-                                             'backgroundColor': '#FFB6C1',
+                                             'backgroundColor': '#ff6e6e',
                                          }
                                      ],
                                      css=[{
@@ -108,11 +111,10 @@ def update_graph(data):
                                            x="comment_relevance",
                                            title='Distribution of Comment Relevance',
                                            labels={'comment_relevance':'Comment Relevance Score', 'count':'Number of Comments'},
-                                           opacity=0.6, 
                                            color="color",
                                            color_discrete_map={
-                                           "green": "green",
-                                           "red": "red",
+                                           "green": "#80ff59",
+                                           "red": "#ff6e6e",
                                            "orange": "orange"})
         comm_relevance_dist.update_layout(yaxis_title="Number of Comments", showlegend=False)
         comm_relevance_dist.add_vline(x=THRESHOLD, line_width=3, line_dash="dash", line_color="black")
@@ -131,7 +133,7 @@ def update_graph(data):
         comment_df = df[['comment', 'comment_relevance']].copy()
 
         comment_df.rename(columns={'comment': 'Comment', 'comment_relevance': 'Comment Relevance'}, inplace=True)
-        return f'Subreddit: {subreddit}', comm_relevance_dist, test_output, comment_df.to_dict('records')
+        return f'For r/{subreddit}, we calculated relevance scores to see how relevant comments were to their original posts. We believe relevance to be an important factor in deciding if a discussion is propagating in the right direction.', comm_relevance_dist, test_output, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, "", []

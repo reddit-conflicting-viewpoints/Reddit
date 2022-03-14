@@ -148,7 +148,7 @@ def render_page_content(pathname):
                             html.P('We aim to understand how we can use current approaches to natural language processing to understand the semantics of debate and biased discussion by uncovering conflicting viewpoints. On a social level, we aim to create an impact in such forums to enable balanced debates on varying perspectives to show respect to all views with reasonable arguments.', className = 'fs-4')
 
                         ]),
-
+####TODO: show technical details of implementation
 
             ])
         
