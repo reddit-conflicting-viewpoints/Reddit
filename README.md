@@ -19,8 +19,11 @@ We aim to understand how we can use current approaches to natural language proce
  
 The TSAR System is a complex data engineering pipeline that utilizes Natural Language Processing to analyze internet forum discussions using dedicated APIs depending on the source of data.
 Here we use Reddit APIs to access data from various subreddits.
-The TSAR system is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application.
-
+The TSAR system is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application, which are as follows:
+* Topic Modeling - To find topics in Posts and Comments
+* Sentiment Analysis - To find sentiments of Posts and Comments.
+* Relevance Score - To observe the relevance of Comments with respect to their Posts.
+* Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.
 
 ## Installation and Setup
 This tutorial will allow you to run the code locally on your own machine!  
