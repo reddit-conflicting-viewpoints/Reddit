@@ -10,11 +10,17 @@ TEXT_STYLE = {
     'textAlign':'center',
     'width': '70%',
     'margin': '0 auto',
+    'background-color': 'AliceBlue',
+    'color': 'Blue'
 }
 
 layout =html.Div([
             html.H1('Subreddit Information',style={'textAlign':'center'}),
-            html.H3(id="factssubredditprinter", style={'textAlign':'center'}),
+            html.Div([
+                html.H3(id="factssubredditprinter", className="display-6 text-center"),
+                html.Hr(),
+            ]), 
+            html.P('Here, you can check out more information about the subreddit. A snapshot of posts and their comments can be previewed along with the popularity and size of the subreddit selected.', className = 'fs-4'),
             dbc.Card(style=PADDING_STYLE, children=[
                 html.H5("Subreddit Description"),
                 html.Div(className='row', children=[
@@ -72,7 +78,7 @@ layout =html.Div([
                 dcc.Loading(children=[
                     # html.H5("Comments Data Preview", style=TEXT_STYLE),
                     # html.P("Click a post in the above Post Table to view comments for that post", style=TEXT_STYLE),
-                    html.P("Click a post in the above Post Table to view comments for that post"),
+                    html.P("Click a post in the above Post Table to view comments for that post", style=TEXT_STYLE),
                     dash_table.DataTable(id="subredditcommenttable", page_size=5,
                                          # fixed_rows={'headers': True},
                                          style_header={'font-weight': 'bold'},
@@ -102,7 +108,8 @@ layout =html.Div([
 
             ### Score Frequency Plots
             dbc.Card([
-                html.H5("Score Frequency Distribution Plots", className="card-title"),
+                html.H5("Popularity", className="card-title"),
+                html.P('Score indicates the total number of upvotes for a submission (post/comment), hence showing us Popularity.', className = 'card-subtitle'),
                 html.Div(className='row', children=[
                     dcc.Loading(children=[
                         html.Div([
@@ -123,7 +130,8 @@ layout =html.Div([
 
             ### Word Count Frequency Plots
             dbc.Card([
-                html.H5("Word Count Frequency Distribution Plots", className="card-title"),
+                html.H5("Size", className="card-title"),
+                html.P('Word-count per submission shows us Size.', className = 'fs-4'),
                 html.Div(className='row', children=[
                     dcc.Loading(children=[
                         html.Div([
@@ -228,7 +236,7 @@ def update_df(data):
                            xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)", showlegend=False)
 
         post_df.rename(columns={'post_id': 'Post ID', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
-        return f"r/{subreddit}", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
+        return f"What is r/{subreddit}?", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', "", [], [], {}, {}, {}, {}

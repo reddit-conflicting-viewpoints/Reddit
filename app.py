@@ -109,7 +109,7 @@ def render_page_content(pathname):
                         html.Hr(),
                         # Introduction Paragraph
                         html.Div([
-                            html.H4('Our aim is to find ways to identify and discover conflicting viewpoints in online social forums/discussions using topic modeling, sentiment analysis and by measuring relevance of material within these discussions.', className="display-6 text-center"),
+                            html.H4('Our aim is to find ways to identify and discover conflicting viewpoints in online social forums/discussions (subreddits) using topic modeling, sentiment analysis and by measuring relevance of material within these discussions.', className="display-6 text-center"),
                             html.Hr(),
                            ]),                        
                         html.Div([
@@ -140,14 +140,6 @@ def render_page_content(pathname):
                             html.Li('Relevance Score - To observe the relevance of Comments with respect to their Posts.'),
                             html.Li('Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.'),
                         ]),
-                        # html.Div([
-
-                        #     html.H6('What is the TSAR System?', className = 'display-6'),
-                        #     html.P('The TSAR System is a complex data engineering pipeline that utilizes Natural Language Processing to analyze internet forum discussions using dedicated APIs depending on the source of data.', className = 'fs-4'),
-                        #     html.P('Here, we use Reddit APIs to access data from various subreddits.', className = 'fs-4'),
-                        #     html.P('TSAR is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application.', className = 'fs-4'),
-                            
-                        # ]),
                         html.Hr(),
                         html.Div([
                             html.H6('Motivation', className = 'display-6'),
