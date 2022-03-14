@@ -212,7 +212,12 @@ def update_df(data):
                                         title='Frequency Distribution of Comment Score',
                                         opacity=0.8).update_layout(yaxis_title="Number of Comments (log scale)", showlegend=False)
 
-        post_df['word_counts'] = post_df.post_title.str.cat(post_df.post_body, sep=" ").str.split().apply(len)
+        post_df.dropna(inplace=True, subset=['post_title', 'post_body'])
+        df.dropna(inplace=True, subset=['comment'])
+        try:
+            post_df['word_counts'] = post_df.post_title.str.cat(post_df.post_body, sep=" ").str.split().apply(len)
+        except Exception as e:
+            print(e)
         df['word_counts'] = df.comment.astype(str).str.split().apply(len)
 
         # Post Word Count Distribution
