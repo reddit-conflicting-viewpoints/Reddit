@@ -1,4 +1,5 @@
 # Code source: https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
+from pydoc import classname
 import dash
 from dash import html, dcc, callback, dash_table
 import dash_bootstrap_components as dbc
@@ -9,7 +10,12 @@ from pages.visualize import *
 import pandas as pd
 from pages import relevance_page, facts_page, topicmodeling_page, sentimentanalysis_page, conflictingviewpoints_page
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, 
+                external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'],
+                meta_tags=[
+                  {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+                ], 
+                suppress_callback_exceptions=True)
 app.title = "BEReddiT"
 
 server = app.server
@@ -49,6 +55,8 @@ TEXT_STYLE = {
     'textAlign':'center',
     'width': '70%',
     'margin': '0 auto',
+    'background-color': 'AliceBlue',
+    'color': 'Blue'
 }
 
 sidebar = html.Div(
@@ -56,15 +64,15 @@ sidebar = html.Div(
         html.H2("BEReddiT", className="display-5"),
         html.Hr(),
         html.P(
-            "Visualization Dashboard", className="lead"
+            "The TSAR System", className="lead"
         ),
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
                 dbc.NavLink("Subreddit", href="/facts", active="exact"),
-                dbc.NavLink("Relevance", href="/relevance", active="exact"),
                 dbc.NavLink("Topic Modeling", href="/topicmodeling", active="exact"),
                 dbc.NavLink("Sentiment Analysis", href="/sentimentanalysis", active="exact"),
+                dbc.NavLink("Relevance Score", href="/relevance", active="exact"),
                 dbc.NavLink("Conflicting Viewpoints", href="/conflictingviewpoints", active="exact"),
             ],
             vertical=True,
@@ -97,27 +105,52 @@ def render_page_content(pathname):
             return  html.Div([
 
                         # Welcome Header
-                        html.H1('Welcome to BEReddiT', style={'textAlign':'center'}),
-
+                        html.H1('The Topic-Sentiment and Relevance System | TSAR', style={'textAlign':'center'}),
+                        html.Hr(),
                         # Introduction Paragraph
                         html.Div([
-                            html.P('Add an Introduction here!', style={'textAlign':'center'})
-                        ], style=CENTER_STYLE),
-
-                        # Drop down menu for selecting SubReddit
+                            html.H4('Our aim is to find ways to identify and discover conflicting viewpoints in online social forums/discussions (subreddits) using topic modeling, sentiment analysis and by measuring relevance of material within these discussions.', className="display-6 text-center"),
+                            html.Hr(),
+                           ]),                        
                         html.Div([
-                            html.P('Pick a SubReddit to Analyze', style={'textAlign':'center'}),
-                            html.Div([
-                                dcc.Dropdown(
-                                    subreddits,
-                                    "computerscience",
-                                    id='data',
-                                )
-                            ], style=CENTER_STYLE),
-                            html.H3(id="homesubredditprinter", style=TEXT_STYLE),
-                            html.P("Click on a tab to view analysis on the selected subreddit!", style={'textAlign':'center'})
-                        ])
-                    ])
+                            dbc.Card(
+                                dbc.CardBody(
+                                        [
+                                            html.H3('Pick a SubReddit to Analyze', className="card-title"),
+                                            html.H4(id="homesubredditprinter", className="card-subtitle", style=TEXT_STYLE),
+                                            html.Div([
+                                                dcc.Dropdown(
+                                                    subreddits,
+                                                    "computerscience",
+                                                    id='data',
+                                                )
+                                            ], style=CENTER_STYLE, className='card-text'),
+                                        ]),
+                                    )
+                        ]),
+                        html.Hr(),
+                        html.Div([
+
+                            html.H6('What is the TSAR System?', className = 'display-6'),
+                            html.P('The TSAR System is a complex data engineering pipeline that utilizes Natural Language Processing to analyze internet forum discussions using dedicated APIs depending on the source of data.', className = 'fs-4'),
+                            html.P('Here, we use Reddit APIs to access data from various subreddits.', className = 'fs-4'),
+                            html.P('TSAR is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application, which are as follows:', className = 'fs-4'),
+                            html.Li('Topic Modeling - To find topics in Posts and Comments'),
+                            html.Li('Sentiment Analysis - To find sentiments of Posts and Comments.'),
+                            html.Li('Relevance Score - To observe the relevance of Comments with respect to their Posts.'),
+                            html.Li('Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.'),
+                        ]),
+                        html.Hr(),
+                        html.Div([
+                            html.H6('Motivation', className = 'display-6'),
+                            html.P('With the advent of popular social media or forums and their power in swaying decision-making due to sensationalization of various topics of discussion, it seems to be reasonable to look for polarizing discussion on such platforms. Reddit.com is one of the most popular websites used to discuss and share ideas with like-minded users due to its well-organized structure. Reddit consists of a database of forums referred to as “subreddits” which contain posts about specific topics. Each subreddit has at least one “moderator” who is in charge of the content that is posted on their subreddit. With over 430 million monthly active users and >100,000 active subreddits, Reddit has provided people with a platform to express (potentially radical) ideas and debate on various levels from mundane to extreme topics of discussion.', className = 'fs-4'),
+                            html.P('Bias in opinion is the driving force behind extreme opposition from different sides in a polarizing discussion. This extremism can lead to conflict with no side leaning into a compromising state of resolution. Oftentimes when a debate reaches a level of acute polarization, bias sways different people to incline to different perspectives without giving much thought to the holistic viewpoint. This encouraged us to pursue the idea of understanding, observing and finding ways to uncover these conflicting viewpoints to obtain balanced information from a discussion at hand.', className = 'fs-4'),
+                            html.P('We aim to understand how we can use current approaches to natural language processing to understand the semantics of debate and biased discussion by uncovering conflicting viewpoints. On a social level, we aim to create an impact in such forums to enable balanced debates on varying perspectives to show respect to all views with reasonable arguments.', className = 'fs-4')
+
+                        ]),
+####TODO: show technical details of implementation
+
+            ])
         
         ### Quick Facts Page
         elif pathname == "/facts":
@@ -160,7 +193,7 @@ def render_page_content(pathname):
 def update_df(value):
     # Load the data
     df = get_df(value)
-    return df.to_dict("records"), f"Selected: {value}"
+    return df.to_dict("records"), f"Current Selection is r/{value}"
 
 
 if __name__=='__main__':
