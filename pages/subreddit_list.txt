@@ -1,5 +1,6 @@
 AmItheAsshole
 anime
+announcements
 antimlm
 antiwork
 AskHistorians
@@ -30,12 +31,14 @@ relationship_advice
 science
 Seattle
 Showerthoughts
+Subredditdrama
 talesfromretail
 talesfromtechsupport
 technology
 tifu
 TooAfraidToAsk
 travel
+udub
 UnethicalLifeProTips
 unpopularopinion
 WorkReform
