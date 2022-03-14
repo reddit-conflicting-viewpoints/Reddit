@@ -34,7 +34,7 @@ layout =html.Div([
             ### Comment Relevance Histogram Distribution and T-Test
             dbc.Card([
                 html.H5("Does this Subreddit have relevant discussion?", className = 'card-title'),
-                html.P('This histogram shows us the frequency distribution of relevance scores across all comments in this subreddit.', className = 'card-subtitle'),
+                html.P('This histogram shows us the frequency distribution of relevance scores across all comments in this subreddit. We included a dotted line at the 0.5 relevance mark as we found that to be a good indicator of having good relevance to the parent post in multiple subreddits. Any score >0.5 can be deemed as satisfactorily relevant. *NOTE: Negative relevance score may occur if the comment is too small to compare with its original post!', className = 'card-subtitle'),
                 dcc.Loading(children=[
                     dcc.Graph(id='relevance1'),
                 ]),
@@ -147,7 +147,7 @@ def update_graph(data):
         comment_df['id'] = comment_df.post_id
 
         comment_df.rename(columns={'comment': 'Comment', 'comment_relevance': 'Comment Relevance'}, inplace=True)
-        return f'For r/{subreddit}, we calculated relevance scores to see how relevant comments were to their original posts. We believe relevance to be an important factor in deciding if a discussion is propagating in the right direction.', comm_relevance_dist, test_output, comment_df.to_dict('records')
+        return f'For r/{subreddit}, we calculated relevance scores on a real number scale from 0 to 1 to see how relevant comments were to their original posts, 0 showing no relevance at all and 1 meaning extremely relevant. We believe relevance to be an important factor in deciding if a discussion is propagating in the right direction.', comm_relevance_dist, test_output, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, "", []
