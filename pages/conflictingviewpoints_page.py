@@ -71,14 +71,17 @@ def update_graph_2(data, post_id):
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
         
-        post_id_list = df[['post_id', 'post_index']].groupby('post_id',as_index=False, sort=False).count()
+        post_id_list = df[['post_id', 'post_index', 'post_title']].groupby('post_id',as_index=False, sort=False).agg({'post_index': 'count', 'post_title': 'first'})
         post_id_list = post_id_list[post_id_list['post_index'] > 9].sort_values(by=['post_index'], ascending=False).reset_index(drop=True)
 
         # figure 2
         if post_id is None:
             post_id_here = post_id_list.at[0, 'post_id']
+            post_title = post_id_list.at[0, 'post_title']
         else:
-            post_id_here = post_id
+            # post_id_here = post_id
+            post_title = post_id
+            post_id_here = post_id_list[post_id_list['post_title'] == post_id].iloc[0]['post_id']
 
         sentiment_avgs = []
         for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
@@ -88,10 +91,10 @@ def update_graph_2(data, post_id):
                      "index": "Number of Comments",
                      "value": "Average Comment Sentiment",
                      "variable": "Average Comment Sentiment"
-                 }, title=df[df['post_id'] == post_id_here].iloc[0]['post_title'] + '-' + df.iloc[0]['subreddit'])
+                 }, title=df[df['post_id'] == post_id_here].iloc[0]['post_title'] + ' - ' + df.iloc[0]['subreddit'])
         comment_series_1_plot.update_layout(showlegend=False)
 
-        return post_id_list['post_id'], post_id_here, comment_series_1_plot
+        return post_id_list['post_title'], post_title, comment_series_1_plot
     except KeyError as e:
         print(e)
         return [], '', {}
