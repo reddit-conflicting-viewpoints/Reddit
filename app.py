@@ -116,7 +116,7 @@ def render_page_content(pathname):
                             dbc.Card(
                                 dbc.CardBody(
                                         [
-                                            html.H3('Pick a SubReddit to Analyze', className="card-title"),
+                                            html.H3('Pick a SubReddit to Analyze', className="card-title text-center"),
                                             html.H4(id="homesubredditprinter", className="card-subtitle", style=TEXT_STYLE),
                                             html.Div([
                                                 dcc.Dropdown(
