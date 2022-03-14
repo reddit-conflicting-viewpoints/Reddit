@@ -50,6 +50,7 @@ layout =html.Div([
                     dash_table.DataTable(id="reltable", page_size=10,
                                      style_header={'font-weight': 'bold'},
                                      style_data={'whiteSpace': 'normal'},
+                                     columns=[{'name': 'Comment', 'id': 'Comment'}, {'name': 'Comment Relevance', 'id': 'Comment Relevance'}],
                                      style_cell={
                                              'font-family':'sans-serif',
                                              'textAlign': 'left',
@@ -83,6 +84,9 @@ layout =html.Div([
                                          '''
                                     }]
                     )
+                ]),
+                dcc.Loading(children=[
+                    html.Div(id='relposttable')
                 ]),
             ], style=PADDING_STYLE),
             ### End Comment Relevance Table
@@ -139,10 +143,49 @@ def update_graph(data):
             test_output = PASS_TEST.format(pvalue=test.pvalue)
 
         # Comment Relevance Table
-        comment_df = df[['comment', 'comment_relevance']].copy()
+        comment_df = df[['comment', 'comment_relevance', 'post_id']].copy()
+        comment_df['id'] = comment_df.post_id
 
         comment_df.rename(columns={'comment': 'Comment', 'comment_relevance': 'Comment Relevance'}, inplace=True)
         return f'For r/{subreddit}, we calculated relevance scores to see how relevant comments were to their original posts. We believe relevance to be an important factor in deciding if a discussion is propagating in the right direction.', comm_relevance_dist, test_output, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, "", []
+
+@callback(
+    Output('relposttable', 'children'),
+    Input('session', 'data'),
+    Input('reltable', 'active_cell')
+)
+def display_post(data, active_cell):
+    if active_cell is None:
+        return ""
+
+    df = pd.DataFrame(data)
+    selected = df[df['post_id'] == active_cell['row_id']]
+    selected = selected[['post_id', 'post_title', 'post_body']].groupby('post_id').first()
+    selected.rename(columns={'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
+
+    table = dash_table.DataTable(selected.to_dict('records'), page_size=5,
+                                 style_header={'font-weight': 'bold'},
+                                 style_data={'whiteSpace': 'normal'},
+                                 style_cell={
+                                     'font-family':'sans-serif',
+                                     'textAlign': 'left',
+                                     'font-size': '14px',
+                                     'padding-top': '3px',
+                                     'padding-bottom': '8px',
+                                     'padding-left': '8px',
+                                     'padding-right': '8px',
+                                 },
+                                 css=[{
+                                     'selector': '.dash-spreadsheet td div',
+                                     'rule': '''
+                                         line-height: 15px;
+                                         max-height: 75px; min-height: 33px;
+                                         display: block;
+                                         overflow-y: auto;
+                                     '''
+                                }]
+            ),
+    return table
