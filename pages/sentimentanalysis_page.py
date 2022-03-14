@@ -42,6 +42,7 @@ layout =html.Div([
                     dash_table.DataTable(id="senttable", page_size=10,
                                      style_header={'font-weight': 'bold'},
                                      style_data={'whiteSpace': 'normal'},
+                                     columns=[{'name': 'Comment', 'id': 'Comment'}, {'name': 'Comment Sentiment', 'id': 'Comment Sentiment'}],
                                      style_cell={
                                              'font-family':'sans-serif',
                                              'textAlign': 'left',
@@ -93,6 +94,9 @@ layout =html.Div([
                                          '''
                                     }]
                     )
+                ]),
+                dcc.Loading(children=[
+                    html.Div(id='posttable')
                 ]),
             ], style=PADDING_STYLE),
         ])
@@ -169,10 +173,48 @@ def update_graph(data):
 #         print(test)
 
         # Comment Relevance Table
-        comment_df = df[['comment', 'comment_sentiment']].copy()
+        comment_df = df[['comment', 'comment_sentiment', 'post_id']].copy()
+        comment_df['id'] = comment_df.post_id
 
         comment_df.rename(columns={'comment': 'Comment', 'comment_sentiment': 'Comment Sentiment'}, inplace=True)
         return f"Let's look at the sentiments of posts and comments in r/{subreddit} to see if we can identify conflict of interests with respect to comments and their posts. Here, sentiments are labeled on a scale of 1-5: 1 being negative sentiments, 3 being neutral and 5 being positive sentiments. Usually negative sentiments are the ones that project conflict.", post_sent_fig, comment_sent_fig, comment_df.to_dict('records')
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}, {}, []
+
+@callback(
+    Output('posttable', 'children'),
+    Input('session', 'data'),
+    Input('senttable', 'active_cell')
+)
+def display_post(data, active_cell):
+    if active_cell is None:
+        return ""
+
+    df = pd.DataFrame(data)
+    selected = df[df['post_id'] == active_cell['row_id']]
+    selected = selected[['post_id', 'post_title', 'post_body']].groupby('post_id').first()
+
+    table = dash_table.DataTable(selected.to_dict('records'), page_size=5,
+                                 style_header={'font-weight': 'bold'},
+                                 style_data={'whiteSpace': 'normal'},
+                                 style_cell={
+                                     'font-family':'sans-serif',
+                                     'textAlign': 'left',
+                                     'font-size': '14px',
+                                     'padding-top': '3px',
+                                     'padding-bottom': '8px',
+                                     'padding-left': '8px',
+                                     'padding-right': '8px',
+                                 },
+                                 css=[{
+                                     'selector': '.dash-spreadsheet td div',
+                                     'rule': '''
+                                         line-height: 15px;
+                                         max-height: 75px; min-height: 33px;
+                                         display: block;
+                                         overflow-y: auto;
+                                     '''
+                                }]
+            ),
+    return table
