@@ -12,7 +12,7 @@ layout =html.Div([
 
             html.Div([
                 html.H3("Let's identify conflict with Sentiment", className="display-6 text-center"),
-                html.H3(id='sentimentsubredditprinter',className='fs-4 text-center'),
+                html.P(id='sentimentsubredditprinter',className='fs-4 text-center'),
                 html.Hr(),
             ]), 
             ### Sentiment post and comment Distribution Plots
@@ -68,19 +68,19 @@ layout =html.Div([
                                              'if': {
                                                  'filter_query': '{Comment Sentiment} = 3',
                                              },
-                                             'backgroundColor': '#b6d7ff',
+                                             'backgroundColor': '#ffef78',
                                          },
                                         {
                                              'if': {
                                                  'filter_query': '{Comment Sentiment} = 2',
                                              },
-                                             'backgroundColor': '#f9b6ff',
+                                             'backgroundColor': '#ffac78',
                                          },
                                          {
                                              'if': {
                                                  'filter_query': '{Comment Sentiment} = 1',
                                              },
-                                             'backgroundColor': '#FFB6C1',
+                                             'backgroundColor': '#ff6e6e',
                                          }
                                      ],
                                      css=[{
@@ -114,7 +114,7 @@ def update_graph(data):
         post_df["color"] = np.select(
             [post_df["post_sentiment"].eq(5), post_df["post_sentiment"].eq(4), post_df["post_sentiment"].eq(2), post_df["post_sentiment"].eq(1)],
             ["green", "lightgreen", "orange", "red"],
-            "blue"
+            "yellow"
         )
         post_sent_fig = px.histogram(post_df, 
                                      x="post_sentiment",
@@ -124,9 +124,9 @@ def update_graph(data):
                                      color_discrete_map={
                                          "green": "#91ff78",
                                          "lightgreen": "#ddffb6",
-                                         "orange": "#f9b6ff",
-                                         "red": "#FFB6C1",
-                                         "blue": "#b6d7ff"
+                                         "orange": "#ffac78",
+                                         "red": "#ff6e6e",
+                                         "yellow": "#ffef78"
                                      }).update_layout(
                                      xaxis_title="Sentiment", yaxis_title="Number of Posts", showlegend=False)
 
@@ -135,7 +135,7 @@ def update_graph(data):
         df["color"] = np.select(
             [df["comment_sentiment"].eq(5), df["comment_sentiment"].eq(4), df["comment_sentiment"].eq(2), df["comment_sentiment"].eq(1)],
             ["green", "lightgreen", "orange", "red"],
-            "blue"
+            "yellow"
         )
         comment_sent_fig = px.histogram(df, 
                                         x="comment_sentiment",
@@ -145,9 +145,9 @@ def update_graph(data):
                                         color_discrete_map={
                                         "green": "#91ff78",
                                          "lightgreen": "#ddffb6",
-                                         "orange": "#f9b6ff",
-                                         "red": "#FFB6C1",
-                                         "blue": "#b6d7ff"
+                                         "orange": "#ffac78",
+                                         "red": "#ff6e6e",
+                                         "yellow": "#ffef78"
                                         }).update_layout(
                                         xaxis_title="Sentiment", yaxis_title="Number of Comments", showlegend=False)
 
