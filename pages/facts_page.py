@@ -215,6 +215,7 @@ def update_df(data, value):
                                         title='Frequency Distribution of Comment Score',
                                         opacity=0.8).update_layout(yaxis_title="Number of Comments (log scale)", showlegend=False)
 
+
         post_df.dropna(inplace=True, subset=['post_title', 'post_body'])
         df.dropna(inplace=True, subset=['comment'])
         try:
@@ -230,6 +231,7 @@ def update_df(data, value):
                                        color_discrete_sequence=['indianred'],
                                        text_auto=True).update_layout(
                                        yaxis_title="Number of Posts", showlegend=False)
+
             # Comment Word Count Distribution
             comment_word = df['word_counts'].dropna().to_numpy()
             comment_word = reject_outliers(comment_scores)
