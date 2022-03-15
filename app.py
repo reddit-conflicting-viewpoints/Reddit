@@ -66,10 +66,9 @@ with open('pages/fig.json', 'r') as f:
 
 sidebar = html.Div(
     [
-        html.H2("BEReddiT", className="display-5"),
-        html.Hr(),
+        html.Img(src='/assets/bereddit-logo.png', style={'width':'100%'}),
         html.P(
-            "The TSAR System", className="lead"
+            "BEReddiT", className="display-5 text-center"
         ),
         dbc.Nav(
             [
@@ -121,7 +120,7 @@ def render_page_content(pathname):
                             dbc.Card(
                                 dbc.CardBody(
                                         [
-                                            html.H3('Pick a SubReddit to Analyze', className="card-title"),
+                                            html.H3('Pick a SubReddit to Analyze', className="card-title text-center"),
                                             html.H4(id="homesubredditprinter", className="card-subtitle", style=TEXT_STYLE),
                                             html.Div([
                                                 dcc.Dropdown(
