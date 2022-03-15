@@ -232,7 +232,7 @@ def update_df(data, value):
                                        yaxis_title="Number of Posts", showlegend=False)
             # Comment Word Count Distribution
             comment_word = df['word_counts'].dropna().to_numpy()
-            comment_word = reject_outliers(comment_scores)
+            comment_word = reject_outliers(comment_word)
             comms_word_count = px.histogram(comment_word, 
                                log_y=True,
                                title='Word-Count Distribution for Comments',
