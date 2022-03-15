@@ -23,6 +23,7 @@ layout =html.Div([
                             ),
                         ], style={'width': '70%', 'margin': '0 auto'}),
                         dcc.Graph(id='viewpoints2'),
+                        dcc.Graph(id='viewpoints3'),
                     ])
                 ], style=PADDING_STYLE),
         ])
@@ -50,10 +51,6 @@ def update_graph(data):
                      "comment_relevance_mean": "Comment Relevance"
                  })
 
-        # relevance_avgs = []
-        # for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
-        #     relevance_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_relevance'].mean())
-
         return f'Subreddit: {subreddit}', controversy_relevance_plot
     except KeyError as e:
         print(e)
@@ -63,6 +60,7 @@ def update_graph(data):
     Output('post_selection', 'options'),
     Output('post_selection', 'value'),
     Output('viewpoints2', 'figure'),
+    Output('viewpoints3', 'figure'),
     Input('session', 'data'),
     Input('post_selection', 'value')
 )
@@ -70,7 +68,7 @@ def update_graph_2(data, post_id):
     try:
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
-        
+
         post_id_list = df[['post_id', 'post_index', 'post_title']].groupby('post_id',as_index=False, sort=False).agg({'post_index': 'count', 'post_title': 'first'})
         post_id_list = post_id_list[post_id_list['post_index'] > 9].sort_values(by=['post_index'], ascending=False).reset_index(drop=True)
 
@@ -83,18 +81,29 @@ def update_graph_2(data, post_id):
             post_title = post_id
             post_id_here = post_id_list[post_id_list['post_title'] == post_id].iloc[0]['post_id']
 
-        sentiment_avgs = []
-        for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
-            sentiment_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_sentiment'].mean())
+        sent_df = df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)
+        sent_df['rolling_rel'] = sent_df['comment_relevance'].rolling(5).mean()
+        sent_df['rolling_sent'] = sent_df['comment_sentiment'].rolling(5).mean()
+        rel_avgs = sent_df['rolling_rel'].tolist()
+        rel_avgs.insert(0, np.nan)
+        sentiment_avgs = sent_df['rolling_sent'].tolist()
+        sentiment_avgs.insert(0, np.nan)
 
         comment_series_1_plot = px.line(sentiment_avgs, labels={
                      "index": "Number of Comments",
-                     "value": "Average Comment Sentiment",
-                     "variable": "Average Comment Sentiment"
-                 }, title=df[df['post_id'] == post_id_here].iloc[0]['post_title'] + ' - ' + df.iloc[0]['subreddit'])
+                     "value": "Rolling Average Comment Sentiment (5 Comments)",
+                     "variable": "Rolling Average Comment Sentiment (5 Comments)"
+                 }, title=post_title + ' - ' + subreddit)
         comment_series_1_plot.update_layout(showlegend=False)
 
-        return post_id_list['post_title'], post_title, comment_series_1_plot
+        comment_series_2_plot = px.line(rel_avgs, labels={
+                     "index": "Number of Comments",
+                     "value": "Rolling Average Comment Relevance (5 Comments)",
+                     "variable": "Rolling Average Comment Relevance (5 Comments)"
+                 }, title=post_title + ' - ' + subreddit)
+        comment_series_2_plot.update_layout(showlegend=False)
+
+        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot
     except KeyError as e:
         print(e)
-        return [], '', {}
+        return [], '', {}, {}
