@@ -129,24 +129,27 @@ layout =html.Div([
             ### End of plot
 
             ### Word Count Frequency Plots
-            dbc.Card([
-                html.H5("Size", className="card-title"),
-                html.P('Word-count per submission shows us Size.', className = 'fs-4'),
-                html.Div(className='row', children=[
-                    dcc.Loading(children=[
-                        html.Div([
-                            ### Post Word Count Plot
-                            html.Div(className="six columns", children=[
-                                dcc.Graph(id='facts3'),
-                            ]),
-                            ### Comment Word Count Plot
-                            html.Div(className="six columns", children=[
-                                dcc.Graph(id="facts4"),
-                            ])
-                        ]),
-                    ]),
-                ]),
-            ], style=PADDING_STYLE),
+            dcc.Loading(children=[
+                html.Div(id='facts3'),
+            ])
+            # dbc.Card([
+            #     html.H5("Size", className="card-title"),
+            #     html.P('Word-count per submission shows us Size.', className = 'fs-4'),
+            #     html.Div(className='row', children=[
+            #         dcc.Loading(children=[
+            #             html.Div([
+            #                 ### Post Word Count Plot
+            #                 html.Div(className="six columns", children=[
+            #                     dcc.Graph(id='facts3'),
+            #                 ]),
+            #                 ### Comment Word Count Plot
+            #                 html.Div(className="six columns", children=[
+            #                     dcc.Graph(id="facts4"),
+            #                 ])
+            #             ]),
+            #         ]),
+            #     ]),
+            # ], style=PADDING_STYLE),
             ### End of plot
         ])
 
@@ -157,16 +160,16 @@ layout =html.Div([
     Output('subreddittable', 'data'),
     Output('facts1', 'figure'),
     Output('facts2', 'figure'),
-    Output('facts3', 'figure'),
-    Output('facts4', 'figure'),
+    Output('facts3', 'children'),
     Input('session', 'data'),
+    Input('session2', 'data'),
 )
-def update_df(data):
+def update_df(data, value):
     try:
         # Load the data
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
-        subreddit_df = get_df_description(subreddit)
+        subreddit_df = get_df_description(value)
 
         # Obtain description of the subreddit
         description = subreddit_df.at[0, 'description']
@@ -216,38 +219,56 @@ def update_df(data):
         df.dropna(inplace=True, subset=['comment'])
         try:
             post_df['word_counts'] = post_df.post_title.str.cat(post_df.post_body, sep=" ").str.split().apply(len)
-        except Exception as e:
-            print(e)
-        df['word_counts'] = df.comment.astype(str).str.split().apply(len)
-        # print(post_df['word_counts'])
-
-        # Post Word Count Distribution
-        post_word = post_df['word_counts'].dropna().to_numpy()
-        # print(post_word)
-        post_word = reject_outliers(post_word)
-        # print(post_word)
-        post_word_count = px.histogram(post_word, 
+            df['word_counts'] = df.comment.astype(str).str.split().apply(len)
+            # Post Word Count Distribution
+            post_word = post_df['word_counts'].dropna().to_numpy()
+            post_word = reject_outliers(post_word)
+            post_word_count = px.histogram(post_word, 
                                        title='Word-Count Distribution for Posts',
                                        labels={'value':'Word Count', 'count':'Number of Posts'},
                                        opacity=0.8,
                                        color_discrete_sequence=['indianred'],
                                        text_auto=True).update_layout(
                                        yaxis_title="Number of Posts", showlegend=False)
+            # Comment Word Count Distribution
+            comment_word = df['word_counts'].dropna().to_numpy()
+            comment_word = reject_outliers(comment_scores)
+            comms_word_count = px.histogram(comment_word, 
+                               log_y=True,
+                               title='Word-Count Distribution for Comments',
+                               opacity=0.8).update_layout(
+                               xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)", showlegend=False)
 
-        # Comment Word Count Distribution
-        comment_word = df['word_counts'].dropna().to_numpy()
-        comment_word = reject_outliers(comment_scores)
-        comms_word_count = px.histogram(comment_word, 
-                           log_y=True,
-                           title='Word-Count Distribution for Comments',
-                           opacity=0.8).update_layout(
-                           xaxis_title="Word Count", yaxis_title="Number of Comments (log scale)", showlegend=False)
+            if len(comment_word) == 0 or len(post_word) == 0:
+                card = ""
+            else: 
+                card =  dbc.Card([
+                            html.H5("Size", className="card-title"),
+                            html.P('Word-count per submission shows us Size.', className = 'fs-4'),
+                            html.Div(className='row', children=[
+                                dcc.Loading(children=[
+                                    html.Div([
+                                        ### Post Word Count Plot
+                                        html.Div(className="six columns", children=[
+                                            dcc.Graph(figure=post_word_count),
+                                        ]),
+                                        ### Comment Word Count Plot
+                                        html.Div(className="six columns", children=[
+                                            dcc.Graph(figure=comms_word_count),
+                                        ])
+                                    ]),
+                                ]),
+                            ]),
+                        ], style=PADDING_STYLE),
+
+        except Exception as e:
+            print(e)
 
         post_df.rename(columns={'post_id': 'Post ID', 'post_title': 'Post Title', 'post_body': 'Post Body'}, inplace=True)
-        return f"What is r/{subreddit}?", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, post_word_count, comms_word_count
+        return f"What is r/{subreddit}?", description, facts, post_df.to_dict('records'), posts_score_hist, comms_score_hist, card
     except KeyError as e:
         print(e)
-        return 'No data loaded! Go to Home Page first!', "", [], [], {}, {}, {}, {}
+        return 'No data loaded! Go to Home Page first!', "", [], [], {}, {}, ""
 
 @callback(
     Output('subredditcommenttable', 'data'),
