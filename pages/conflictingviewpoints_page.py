@@ -24,6 +24,7 @@ layout =html.Div([
                         ], style={'width': '70%', 'margin': '0 auto'}),
                         dcc.Graph(id='viewpoints2'),
                         dcc.Graph(id='viewpoints3'),
+                        dcc.Graph(id='viewpoints4'),
                     ])
                 ], style=PADDING_STYLE),
         ])
@@ -61,6 +62,7 @@ def update_graph(data):
     Output('post_selection', 'value'),
     Output('viewpoints2', 'figure'),
     Output('viewpoints3', 'figure'),
+    Output('viewpoints4', 'figure'),
     Input('session', 'data'),
     Input('post_selection', 'value')
 )
@@ -82,13 +84,11 @@ def update_graph_2(data, post_id):
             post_id_here = post_id_list[post_id_list['post_title'] == post_id].iloc[0]['post_id']
 
         sent_df = df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)
-        sent_df['rolling_rel'] = sent_df['comment_relevance'].rolling(5).mean()
+
+        ### Sentiment Plot
         sent_df['rolling_sent'] = sent_df['comment_sentiment'].rolling(5).mean()
-        rel_avgs = sent_df['rolling_rel'].tolist()
-        rel_avgs.insert(0, np.nan)
         sentiment_avgs = sent_df['rolling_sent'].tolist()
         sentiment_avgs.insert(0, np.nan)
-
         comment_series_1_plot = px.line(sentiment_avgs, labels={
                      "index": "Number of Comments",
                      "value": "Rolling Average Comment Sentiment (5 Comments)",
@@ -96,6 +96,10 @@ def update_graph_2(data, post_id):
                  }, title=post_title + ' - ' + subreddit)
         comment_series_1_plot.update_layout(showlegend=False)
 
+        ### Relevance Plot
+        sent_df['rolling_rel'] = sent_df['comment_relevance'].rolling(5).mean()
+        rel_avgs = sent_df['rolling_rel'].tolist()
+        rel_avgs.insert(0, np.nan)
         comment_series_2_plot = px.line(rel_avgs, labels={
                      "index": "Number of Comments",
                      "value": "Rolling Average Comment Relevance (5 Comments)",
@@ -103,7 +107,19 @@ def update_graph_2(data, post_id):
                  }, title=post_title + ' - ' + subreddit)
         comment_series_2_plot.update_layout(showlegend=False)
 
-        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot
+        ### Controversy Plot
+        sent_df['sentiment_diff'] = sent_df['comment_sentiment'] - sent_df['post_sentiment']
+        sent_df['rolling_diff'] = sent_df['sentiment_diff'].rolling(5).mean()
+        diff_avgs = sent_df['rolling_diff'].tolist()
+        diff_avgs.insert(0, np.nan)
+        comment_series_3_plot = px.line(diff_avgs, labels={
+                     "index": "Number of Comments",
+                     "value": "Rolling Average Comment Controversy (5 Comments)",
+                     "variable": "Rolling Average Comment Controversy (5 Comments)"
+                 }, title=post_title + ' - ' + subreddit)
+        comment_series_3_plot.update_layout(showlegend=False)
+
+        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot, comment_series_3_plot
     except KeyError as e:
         print(e)
-        return [], '', {}, {}
+        return [], '', {}, {}, {}
