@@ -136,6 +136,7 @@ def update_graph(data):
                                      title='Sentiment Distribution for Posts',
                                      text_auto=True, 
                                      color="color",
+                                     labels={'post_sentiment':'Post Sentiment', 'color':'Post Sentiment'},
                                      color_discrete_map={
                                          "green": "#91ff78",
                                          "lightgreen": "#ddffb6",
@@ -155,6 +156,7 @@ def update_graph(data):
         comment_sent_fig = px.histogram(df, 
                                         x="comment_sentiment",
                                         title='Sentiment Distribution for Comments',
+                                        labels={'comment_sentiment':'Comment Sentiment', 'color':'Comment Sentiment'},
                                         text_auto=True,
                                         color="color",
                                         color_discrete_map={
