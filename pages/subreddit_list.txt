@@ -14,6 +14,7 @@ dating
 explainlikeimfive
 gaming
 geopolitics
+IDontWorkHereLady
 IllegalLifeProTips
 leagueoflegends
 legaladvice
@@ -38,6 +39,7 @@ talesfromretail
 talesfromtechsupport
 technology
 tifu
+TalesFromYourServer
 TooAfraidToAsk
 travel
 udub

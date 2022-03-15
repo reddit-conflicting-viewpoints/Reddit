@@ -70,14 +70,10 @@ def update_graph(data):
         fig1_df = fig1_df.droplevel(1, axis=1)
         cols = ['comment_topics', 'comment_relevance_mean', 'comment_relevance_size', 'sentiment_diff_mean', 'sentiment_diff_size']
         fig1_df.columns = cols
-        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title='r/'+df.iloc[0]['subreddit'], hover_name='comment_topics', labels={
+        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title='r/'+subreddit, hover_name='comment_topics', labels={
                      "sentiment_diff_mean": "Average Controversy",
                      "comment_relevance_mean": "Average Comment Relevance"
                  })
-
-        # relevance_avgs = []
-        # for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
-        #     relevance_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_relevance'].mean())
 
         return f'We used posts and comments sentiment scores as well as their relevance scores to identify conflicting viewpoints in r/{subreddit}.', controversy_relevance_plot
     except KeyError as e:
@@ -89,7 +85,6 @@ def update_graph(data):
     Output('post_selection', 'value'),
     Output('viewpoints2', 'figure'),
     Output('viewpoints3', 'figure'),
-    # Output('viewpoints4', 'figure'),
     Input('session', 'data'),
     Input('post_selection', 'value')
 )
@@ -146,7 +141,7 @@ def update_graph_2(data, post_id):
         #          }, title=post_title + ' - ' + subreddit)
         # comment_series_3_plot.update_layout(showlegend=False)
 
-        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot #, comment_series_3_plot
+        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot
     except KeyError as e:
         print(e)
-        return [], '', {}, {} #, {}
+        return [], '', {}, {}
