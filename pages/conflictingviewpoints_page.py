@@ -8,7 +8,7 @@ import numpy as np
 
 
 layout =html.Div([
-             html.H1('Conflicting Viewpoints',style={'textAlign':'center'}),
+            html.H1('Conflicting Viewpoints',style={'textAlign':'center'}),
             html.Div([
                 html.H3("Identifying Conflict, Influence and Polarizing Views", className="display-6 text-center"),
                 html.P(id='conflictprinter',className='fs-4 text-center'),
