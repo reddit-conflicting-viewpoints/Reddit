@@ -91,7 +91,7 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 app.layout = html.Div([
     dcc.Location(id="url"),
     dcc.Loading(children=[dcc.Store(id='session', storage_type='memory')], fullscreen=True),
-    # dcc.Loading(children=[html.Div(id='session', style={'display':'none'})], fullscreen=True),
+    dcc.Loading(children=[dcc.Store(id='session2', storage_type='memory')], fullscreen=True),
     sidebar,
     content
 ])
@@ -196,13 +196,14 @@ def render_page_content(pathname):
 ### USED TO UPDATE THE DF FROM HOME PAGE
 @app.callback(
     Output('session', 'data'),
+    Output('session2', 'data'),
     Output('homesubredditprinter', 'children'),
     Input('data', 'value')
 )
 def update_df(value):
     # Load the data
     df = get_df(value)
-    return df.to_dict("records"), f"Current Selection is r/{value}"
+    return df.to_dict("records"), value, f"Current Selection is r/{value}"
 
 
 if __name__=='__main__':
