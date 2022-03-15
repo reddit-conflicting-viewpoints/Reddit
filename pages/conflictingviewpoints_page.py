@@ -8,23 +8,36 @@ import numpy as np
 
 
 layout =html.Div([
-            html.H1('Conflicting Viewpoints - Identifying Bias, Influence and Polarizing Views',style={'textAlign':'center'}),
-            html.H3(id='conflictprinter',style={'textAlign':'center'}),
-                dbc.Card([
-                    dcc.Loading(children=[
-                        dcc.Graph(id='viewpoints1'),
-                    ])
-                ], style=PADDING_STYLE),
-                dbc.Card([
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            dcc.Dropdown(
-                                id='post_selection'
-                            ),
-                        ], style={'width': '70%', 'margin': '0 auto'}),
-                        dcc.Graph(id='viewpoints2'),
-                    ])
-                ], style=PADDING_STYLE),
+            html.H1('Conflicting Viewpoints',style={'textAlign':'center'}),
+            html.Div([
+                html.H3("Identifying Conflict, Influence and Polarizing Views", className="display-6 text-center"),
+                html.P(id='conflictprinter',className='fs-4 text-center'),
+                html.Hr(),
+            ]), 
+            dbc.Card([
+                html.H5("Controversy and Relevance of comments by Topics", className="card-title"),
+                html.P("Here we summarize topics, sentiments and relevance in one graph. Each point represents aggregates by Topics", className = 'card-subtitle'),
+                html.Li("Controversy (y-axis) Scale(-4, 4): We calculated the controversy score by finding how much the sentiment of a post's comment deviates from the sentiment of the post itself. In this axis we aggregated these deviations by topic."),
+                html.Li("Relevance (x-axis) Scale(0, 1): Relevance is determined as shown previously. This axis shows the average relevance of comments aggregated by Topics."),
+                html.Li("Comment Count (size): The size indicates how many comments belong to that Topic."),
+                html.P("NOTE: Positive or negative controversy shows in which polarity the comments conflicted with their posts. This means that comments were either more positive or negative with respect the post they respond to.", className = 'card-subtitle'),
+
+                
+                
+                dcc.Loading(children=[
+                    dcc.Graph(id='viewpoints1'),
+                ])
+            ], style=PADDING_STYLE),
+            dbc.Card([
+                dcc.Loading(children=[
+                    html.Div(children=[
+                        dcc.Dropdown(
+                            id='post_selection'
+                        ),
+                    ], style={'width': '70%', 'margin': '0 auto'}),
+                    dcc.Graph(id='viewpoints2'),
+                ])
+            ], style=PADDING_STYLE),
         ])
 
 
@@ -45,16 +58,16 @@ def update_graph(data):
         fig1_df = fig1_df.droplevel(1, axis=1)
         cols = ['comment_topics', 'comment_relevance_mean', 'comment_relevance_size', 'sentiment_diff_mean', 'sentiment_diff_size']
         fig1_df.columns = cols
-        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title=df.iloc[0]['subreddit'], hover_name='comment_topics', labels={
-                     "sentiment_diff_mean": "Controversy",
-                     "comment_relevance_mean": "Comment Relevance"
+        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title='r/'+df.iloc[0]['subreddit'], hover_name='comment_topics', labels={
+                     "sentiment_diff_mean": "Average Controversy",
+                     "comment_relevance_mean": "Average Comment Relevance"
                  })
 
         # relevance_avgs = []
         # for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
         #     relevance_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_relevance'].mean())
 
-        return f'Subreddit: {subreddit}', controversy_relevance_plot
+        return f'We used posts and comments sentiment scores as well as their relevance scores to identify conflicting viewpoints in r/{subreddit}.', controversy_relevance_plot
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}
