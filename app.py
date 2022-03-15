@@ -120,7 +120,7 @@ def render_page_content(pathname):
                             dbc.Card(
                                 dbc.CardBody(
                                         [
-                                            html.H3('Pick a SubReddit to Analyze', className="card-title text-center"),
+                                            html.H3('Pick a SubReddit to Analyze (Use the plot below for guidance!)', className="card-title text-center"),
                                             html.H4(id="homesubredditprinter", className="card-subtitle", style=TEXT_STYLE),
                                             html.Div([
                                                 dcc.Dropdown(
@@ -135,25 +135,26 @@ def render_page_content(pathname):
                         html.Hr(),
                         ### Figure for subreddit scatter plot
                         dcc.Loading(children=[
+                            html.P("The Map of Reddit gives you a bird's-eye view of the results of the TSAR system on multiple subreddits' comments. It's designed to help you choose interesting subreddits to look at with TSAR. Each point is a subreddit. It shows two important metrics that we devised: Comment Controversy - showing average conflict in discussions by either positively or negatively affecting the sentiments of the discussion; and Comment Relevance - showing how relevant comments are to their posts.", className = 'fs-3'),
                             dcc.Graph(figure=subreddit_fig),
                         ]),
                         html.Div([
 
                             html.H6('What is the TSAR System?', className = 'display-6'),
-                            html.P('The TSAR System is a complex data engineering pipeline that utilizes Natural Language Processing to analyze internet forum discussions using dedicated APIs depending on the source of data.', className = 'fs-4'),
-                            html.P('Here, we use Reddit APIs to access data from various subreddits.', className = 'fs-4'),
-                            html.P('TSAR is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application, which are as follows:', className = 'fs-4'),
-                            html.Li('Topic Modeling - To find topics in Posts and Comments'),
-                            html.Li('Sentiment Analysis - To find sentiments of Posts and Comments.'),
-                            html.Li('Relevance Score - To observe the relevance of Comments with respect to their Posts.'),
-                            html.Li('Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.'),
+                            html.P('The TSAR System is a complex data engineering pipeline that utilizes Natural Language Processing to analyze internet forum discussions using dedicated APIs depending on the source of data.', className = 'fs-3'),
+                            html.P('Here, we use Reddit APIs to access data from various subreddits.', className = 'fs-3'),
+                            html.P('TSAR is powered by BERT word embeddings and the system consists of multiple components that you will see in the various pages of this application, which are as follows:', className = 'fs-3'),
+                            html.Li('Topic Modeling - To find topics in Posts and Comments', className = 'fs-3'),
+                            html.Li('Sentiment Analysis - To find sentiments of Posts and Comments.', className = 'fs-3'),
+                            html.Li('Relevance Score - To observe the relevance of Comments with respect to their Posts.', className = 'fs-3'),
+                            html.Li('Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.', className = 'fs-3'),
                         ]),
                         html.Hr(),
                         html.Div([
                             html.H6('Motivation', className = 'display-6'),
-                            html.P('With the advent of popular social media or forums and their power in swaying decision-making due to sensationalization of various topics of discussion, it seems to be reasonable to look for polarizing discussion on such platforms. Reddit.com is one of the most popular websites used to discuss and share ideas with like-minded users due to its well-organized structure. Reddit consists of a database of forums referred to as “subreddits” which contain posts about specific topics. Each subreddit has at least one “moderator” who is in charge of the content that is posted on their subreddit. With over 430 million monthly active users and >100,000 active subreddits, Reddit has provided people with a platform to express (potentially radical) ideas and debate on various levels from mundane to extreme topics of discussion.', className = 'fs-4'),
-                            html.P('Bias in opinion is the driving force behind extreme opposition from different sides in a polarizing discussion. This extremism can lead to conflict with no side leaning into a compromising state of resolution. Oftentimes when a debate reaches a level of acute polarization, bias sways different people to incline to different perspectives without giving much thought to the holistic viewpoint. This encouraged us to pursue the idea of understanding, observing and finding ways to uncover these conflicting viewpoints to obtain balanced information from a discussion at hand.', className = 'fs-4'),
-                            html.P('We aim to understand how we can use current approaches to natural language processing to understand the semantics of debate and biased discussion by uncovering conflicting viewpoints. On a social level, we aim to create an impact in such forums to enable balanced debates on varying perspectives to show respect to all views with reasonable arguments.', className = 'fs-4')
+                            html.P('With the advent of popular social media or forums and their power in swaying decision-making due to sensationalization of various topics of discussion, it seems to be reasonable to look for polarizing discussion on such platforms. Reddit.com is one of the most popular websites used to discuss and share ideas with like-minded users due to its well-organized structure. Reddit consists of a database of forums referred to as “subreddits” which contain posts about specific topics. Each subreddit has at least one “moderator” who is in charge of the content that is posted on their subreddit. With over 430 million monthly active users and >100,000 active subreddits, Reddit has provided people with a platform to express (potentially radical) ideas and debate on various levels from mundane to extreme topics of discussion.', className = 'fs-3'),
+                            html.P('Bias in opinion is the driving force behind extreme opposition from different sides in a polarizing discussion. This extremism can lead to conflict with no side leaning into a compromising state of resolution. Oftentimes when a debate reaches a level of acute polarization, bias sways different people to incline to different perspectives without giving much thought to the holistic viewpoint. This encouraged us to pursue the idea of understanding, observing and finding ways to uncover these conflicting viewpoints to obtain balanced information from a discussion at hand.', className = 'fs-3'),
+                            html.P('We aim to understand how we can use current approaches to natural language processing to understand the semantics of debate and biased discussion by uncovering conflicting viewpoints. On a social level, we aim to create an impact in such forums to enable balanced debates on varying perspectives to show respect to all views with reasonable arguments.', className = 'fs-3')
 
                         ]),
 ####TODO: show technical details of implementation
