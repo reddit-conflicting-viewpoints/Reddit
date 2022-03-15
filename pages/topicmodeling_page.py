@@ -89,7 +89,7 @@ def update_graph(data):
         df['comment_topics'] = df['comment_topics'].apply(lambda s: ' '.join(s.split('_')[1:]))
         comm_topics_fig = px.bar(df.comment_topics.value_counts()[:15],
                                  title='<b>Top 15</b> Important Topics For Comments',
-                                 labels={'index':'Topics', 'value':'Count (Number of Comments)'})
+                                 labels={'index':'Topics', 'value':'Count (Number of Comments)', 'variable':'Topics'})
         comm_topics_fig.update_layout(showlegend=False)
         
         # List of all topics

@@ -123,7 +123,7 @@ def update_graph(data):
         comm_relevance_dist = px.histogram(df,
                                            x="comment_relevance",
                                            title='Distribution of Comment Relevance',
-                                           labels={'comment_relevance':'Comment Relevance Score', 'count':'Number of Comments'},
+                                           labels={'comment_relevance':'Comment Relevance Score', 'count':'Number of Comments', 'color':'Comment Relevance Score'},
                                            color="color",
                                            color_discrete_map={
                                            "green": "#80ff59",
