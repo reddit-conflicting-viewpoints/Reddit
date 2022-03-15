@@ -3,6 +3,10 @@
 ![](https://img.shields.io/badge/python-v3.7.12-blue)
 [![](https://img.shields.io/badge/license-MIT-blue)](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/LICENSE)
 
+<p align="center">
+  <img src="https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/assets/bereddit-logo.png" />
+</p>
+
 **By: Andrew Zhou, Sai Muktevi, Preston Stringham, Hasnah Said**
 
 Web Visualization Dashboard is deployed on [appspot](https://bereddit-tsar.wl.r.appspot.com/) and [heroku](http://bereddit-dash.herokuapp.com/).
