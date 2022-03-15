@@ -66,10 +66,9 @@ with open('pages/fig.json', 'r') as f:
 
 sidebar = html.Div(
     [
-        html.H2("BEReddiT", className="display-5"),
-        html.Hr(),
+        html.Img(src='/assets/bereddit-logo.png', style={'width':'100%'}),
         html.P(
-            "The TSAR System", className="lead"
+            "BEReddiT", className="display-5 text-center"
         ),
         dbc.Nav(
             [
