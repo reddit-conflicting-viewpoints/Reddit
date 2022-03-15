@@ -8,7 +8,6 @@ import numpy as np
 
 
 layout =html.Div([
-<<<<<<< HEAD
             html.H1('Conflicting Viewpoints',style={'textAlign':'center'}),
             html.Div([
                 html.H3("Identifying Conflict, Influence and Polarizing Views", className="display-6 text-center"),
@@ -17,7 +16,7 @@ layout =html.Div([
             ]), 
             dbc.Card([
                 html.H5("Controversy and Relevance of comments by Topics", className="card-title"),
-                html.P("Here we summarize topics, sentiments and relevance in one graph. Each point represents aggregates by Topics", className = 'card-subtitle'),
+                html.P("Here we summarize topics, sentiments and relevance in one graph. Each point represents aggregates by Topics.", className = 'card-subtitle'),
                 html.Li("Controversy (y-axis) Scale(-4, 4): We calculated the controversy score by finding how much the sentiment of a post's comment deviates from the sentiment of the post itself. In this axis we aggregated these deviations by topic."),
                 html.Li("Relevance (x-axis) Scale(0, 1): Relevance is determined as shown previously. This axis shows the average relevance of comments aggregated by Topics."),
                 html.Li("Comment Count (size): The size indicates how many comments belong to that Topic."),
@@ -39,27 +38,6 @@ layout =html.Div([
                     dcc.Graph(id='viewpoints2'),
                 ])
             ], style=PADDING_STYLE),
-=======
-            html.H1('Conflicting Viewpoints - Identifying Bias, Influence and Polarizing Views',style={'textAlign':'center'}),
-            html.H3(id='conflictprinter',style={'textAlign':'center'}),
-                dbc.Card([
-                    dcc.Loading(children=[
-                        dcc.Graph(id='viewpoints1'),
-                    ])
-                ], style=PADDING_STYLE),
-                dbc.Card([
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            dcc.Dropdown(
-                                id='post_selection'
-                            ),
-                        ], style={'width': '70%', 'margin': '0 auto'}),
-                        dcc.Graph(id='viewpoints2'),
-                        dcc.Graph(id='viewpoints3'),
-                        dcc.Graph(id='viewpoints4'),
-                    ])
-                ], style=PADDING_STYLE),
->>>>>>> 4b73d274c3d14eb02ce87aa91ce69fc7136283ff
         ])
 
 
@@ -85,15 +63,11 @@ def update_graph(data):
                      "comment_relevance_mean": "Average Comment Relevance"
                  })
 
-<<<<<<< HEAD
         # relevance_avgs = []
         # for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
         #     relevance_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_relevance'].mean())
 
         return f'We used posts and comments sentiment scores as well as their relevance scores to identify conflicting viewpoints in r/{subreddit}.', controversy_relevance_plot
-=======
-        return f'Subreddit: {subreddit}', controversy_relevance_plot
->>>>>>> 4b73d274c3d14eb02ce87aa91ce69fc7136283ff
     except KeyError as e:
         print(e)
         return 'No data loaded! Go to Home Page first!', {}
@@ -102,8 +76,6 @@ def update_graph(data):
     Output('post_selection', 'options'),
     Output('post_selection', 'value'),
     Output('viewpoints2', 'figure'),
-    Output('viewpoints3', 'figure'),
-    Output('viewpoints4', 'figure'),
     Input('session', 'data'),
     Input('post_selection', 'value')
 )
@@ -111,7 +83,7 @@ def update_graph_2(data, post_id):
     try:
         df = pd.DataFrame(data)
         subreddit = df.at[0, 'subreddit']
-
+        
         post_id_list = df[['post_id', 'post_index', 'post_title']].groupby('post_id',as_index=False, sort=False).agg({'post_index': 'count', 'post_title': 'first'})
         post_id_list = post_id_list[post_id_list['post_index'] > 9].sort_values(by=['post_index'], ascending=False).reset_index(drop=True)
 
@@ -124,43 +96,18 @@ def update_graph_2(data, post_id):
             post_title = post_id
             post_id_here = post_id_list[post_id_list['post_title'] == post_id].iloc[0]['post_id']
 
-        sent_df = df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)
+        sentiment_avgs = []
+        for time in list(df[df['post_id'] == post_id_here].sort_values('comment_created', ascending=True)['comment_created']):
+            sentiment_avgs.append(df[(df['post_id'] == post_id_here) & (df['comment_created'] <= time)]['comment_sentiment'].mean())
 
-        ### Sentiment Plot
-        sent_df['rolling_sent'] = sent_df['comment_sentiment'].rolling(5).mean()
-        sentiment_avgs = sent_df['rolling_sent'].tolist()
-        sentiment_avgs.insert(0, np.nan)
         comment_series_1_plot = px.line(sentiment_avgs, labels={
                      "index": "Number of Comments",
-                     "value": "Rolling Average Comment Sentiment (5 Comments)",
-                     "variable": "Rolling Average Comment Sentiment (5 Comments)"
-                 }, title=post_title + ' - ' + subreddit)
+                     "value": "Average Comment Sentiment",
+                     "variable": "Average Comment Sentiment"
+                 }, title=df[df['post_id'] == post_id_here].iloc[0]['post_title'] + ' - ' + df.iloc[0]['subreddit'])
         comment_series_1_plot.update_layout(showlegend=False)
 
-        ### Relevance Plot
-        sent_df['rolling_rel'] = sent_df['comment_relevance'].rolling(5).mean()
-        rel_avgs = sent_df['rolling_rel'].tolist()
-        rel_avgs.insert(0, np.nan)
-        comment_series_2_plot = px.line(rel_avgs, labels={
-                     "index": "Number of Comments",
-                     "value": "Rolling Average Comment Relevance (5 Comments)",
-                     "variable": "Rolling Average Comment Relevance (5 Comments)"
-                 }, title=post_title + ' - ' + subreddit)
-        comment_series_2_plot.update_layout(showlegend=False)
-
-        ### Controversy Plot
-        sent_df['sentiment_diff'] = sent_df['comment_sentiment'] - sent_df['post_sentiment']
-        sent_df['rolling_diff'] = sent_df['sentiment_diff'].rolling(5).mean()
-        diff_avgs = sent_df['rolling_diff'].tolist()
-        diff_avgs.insert(0, np.nan)
-        comment_series_3_plot = px.line(diff_avgs, labels={
-                     "index": "Number of Comments",
-                     "value": "Rolling Average Comment Controversy (5 Comments)",
-                     "variable": "Rolling Average Comment Controversy (5 Comments)"
-                 }, title=post_title + ' - ' + subreddit)
-        comment_series_3_plot.update_layout(showlegend=False)
-
-        return post_id_list['post_title'], post_title, comment_series_1_plot, comment_series_2_plot, comment_series_3_plot
+        return post_id_list['post_title'], post_title, comment_series_1_plot
     except KeyError as e:
         print(e)
-        return [], '', {}, {}, {}
+        return [], '', {}
