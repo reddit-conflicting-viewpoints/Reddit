@@ -1,4 +1,4 @@
-# Reddit
+# BEReddiT
 ![](https://heroku-status-badges.herokuapp.com/bereddit-dash)
 ![](https://img.shields.io/badge/python-v3.7.12-blue)
 [![](https://img.shields.io/badge/license-MIT-blue)](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/LICENSE)
