@@ -29,6 +29,10 @@ The TSAR system is powered by BERT word embeddings and the system consists of mu
 * Relevance Score - To observe the relevance of Comments with respect to their Posts.
 * Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.
 
+**Project Poster and Flyer**  
+Project Poster can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/TSAR_POSTER.pdf).  
+Project Flyer can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/Flyer.pdf).  
+
 ## Installation and Setup
 This tutorial will allow you to run the code locally on your own machine!  
 *It is recommended that you create a new conda environment (if you have conda) or a new virtual environment before installation.*
