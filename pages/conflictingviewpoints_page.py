@@ -70,10 +70,13 @@ def update_graph(data):
         fig1_df = fig1_df.droplevel(1, axis=1)
         cols = ['comment_topics', 'comment_relevance_mean', 'comment_relevance_size', 'sentiment_diff_mean', 'sentiment_diff_size']
         fig1_df.columns = cols
-        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title='Conflicting Viewpoints in r/'+subreddit, hover_name='comment_topics', labels={
-                     "sentiment_diff_mean": "Average Controversy",
-                     "comment_relevance_mean": "Average Comment Relevance"
-                 })
+        fig1_df['comment_topics'] = fig1_df['comment_topics'].apply(lambda s: ' '.join(s.split('_')[1:]))
+        controversy_relevance_plot = cv_plot('scatter', fig1_df[1:], x_col='comment_relevance_mean', y_col='sentiment_diff_mean', size='sentiment_diff_size', title='r/'+subreddit, hover_name='comment_topics', 
+                                             labels={
+                                                 "sentiment_diff_mean": "Average Controversy",
+                                                 "comment_relevance_mean": "Average Comment Relevance",
+                                                 "sentiment_diff_size": "Number of Comments"
+                                             })
 
         return f'We used posts and comments sentiment scores as well as their relevance scores to identify conflicting viewpoints in r/{subreddit}.', controversy_relevance_plot
     except KeyError as e:
@@ -115,7 +118,7 @@ def update_graph_2(data, post_id):
                      "index": "Number of Comments",
                      "value": "Rolling Average Comment Sentiment (5 Comments)",
                      "variable": "Rolling Average Comment Sentiment (5 Comments)"
-                 }, title='Sentiment in Post:"'+post_title + '" - r/' + subreddit)
+                 }, title=post_title + ' - ' + subreddit)
         comment_series_1_plot.update_layout(showlegend=False)
 
         ### Relevance Plot
@@ -126,7 +129,7 @@ def update_graph_2(data, post_id):
                      "index": "Number of Comments",
                      "value": "Rolling Average Comment Relevance (5 Comments)",
                      "variable": "Rolling Average Comment Relevance (5 Comments)"
-                 }, title='Relevance in Post:"'+post_title + '" - r/' + subreddit)
+                 }, title=post_title + ' - ' + subreddit)
         comment_series_2_plot.update_layout(showlegend=False)
 
         ### Controversy Plot

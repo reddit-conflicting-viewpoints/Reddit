@@ -135,7 +135,7 @@ def render_page_content(pathname):
                         html.Hr(),
                         ### Figure for subreddit scatter plot
                         dcc.Loading(children=[
-                            html.P("The Map of Reddit gives you a bird's-eye view of the results of the TSAR system on multiple subreddits' comments. It's designed to help you choose interesting subreddits to look at with TSAR. Each point is a subreddit (hover over points to see). It shows two important metrics that we devised: Comment Controversy - showing average conflict in discussions by either positively or negatively affecting the sentiments of the discussion; and Comment Relevance - showing how relevant comments are to their posts.", className = 'fs-3'),
+                            html.P("The Map of Reddit gives you a bird's-eye view of the results of the TSAR system on multiple subreddits' comments. It's designed to help you choose interesting subreddits to look at with TSAR. Each point is a subreddit. It shows two important metrics that we devised: Comment Controversy - showing average conflict in discussions by either positively or negatively affecting the sentiments of the discussion; and Comment Relevance - showing how relevant comments are to their posts.", className = 'fs-3'),
                             dcc.Graph(figure=subreddit_fig),
                         ]),
                         html.Div([
