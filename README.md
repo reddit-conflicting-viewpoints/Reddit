@@ -1,7 +1,7 @@
 # Topic-Sentiment Analysis and Relevance System (TSAR) - BEReddiT
-![Heroku](https://heroku-badge.herokuapp.com/?app=bereddit-dash)
-![](https://img.shields.io/badge/python-v3.7.12-blue)
-[![](https://img.shields.io/badge/license-MIT-blue)](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/LICENSE)
+![Heroku](https://heroku-status-badges.herokuapp.com/bereddit-dash)
+![Python](https://img.shields.io/badge/python-v3.7.12-blue)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/LICENSE)
 
 <p align="center">
   <img src="https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/assets/bereddit-logo.png" />
