@@ -147,6 +147,7 @@ class SubredditAnalysis:
             p.mkdir(parents=True, exist_ok=True)
             self.bert_posts.to_csv(p.joinpath(post_file_name), index=False)
             self.bert_comments.to_csv(p.joinpath(comments_file_name), index=False)
+            self.res_df['subreddit'] = self.subreddit
             self.res_df.to_csv(p.joinpath(result_file_name), index=False)
         else:
             raise Exception("Missing res_df. Error occured running pipeline.")
