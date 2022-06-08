@@ -11,11 +11,15 @@
 
 Web Visualization Dashboard is deployed on [appspot](https://bereddit-tsar.wl.r.appspot.com/) and [heroku](http://bereddit-dash.herokuapp.com/).
 
+**Project Poster and Flyer**  
+Project Poster can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/TSAR_POSTER.pdf).  
+Project Flyer can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/Flyer.pdf).  
+
 **Introduction**
 
 With the advent of popular social media or forums and their power in swaying decision-making due to sensationalization of various topics of discussion, it seems to be reasonable to look for polarizing discussion on such platforms. Reddit.com is one of the most popular websites used to discuss and share ideas with like-minded users due to its well-organized structure. Reddit consists of a database of forums referred to as “subreddits” which contain posts about specific topics. Each subreddit has at least one “moderator” who is in charge of the content that is posted on their subreddit. With over 430 million monthly active users and >100,000 active subreddits, Reddit has provided people with a platform to express (potentially radical) ideas and debate on various levels from mundane to extreme topics of discussion.  
 
-Bias in opinion is the driving force behind extreme opposition from different sides in a polarizing discussion. This extremism can lead to conflict with no side leaning into a compromising state of resolution. Oftentimes when a debate reaches a level of acute polarization, bias sways different people to incline to different perspectives without giving much thought to the holistic viewpoint. This encouraged us to pursue the idea of understanding, observing and finding ways to uncover these conflicting viewpoints to obtain balanced information from a discussion at hand.  
+Bias in opinion is the driving force behind extreme opposition from different sides in a polarizing discussion. This "extremism" can lead to conflict with no side leaning into a compromising state of resolution. Oftentimes when a debate reaches a level of acute polarization, bias sways different people to incline to different perspectives without giving much thought to the holistic viewpoint. This encouraged us to pursue the idea of understanding, observing and finding ways to uncover these conflicting viewpoints to obtain balanced information from a discussion at hand.  
 
 We aim to understand how we can use current approaches to natural language processing to understand the semantics of debate and biased discussion by uncovering conflicting viewpoints. On a social level, we aim to create an impact in such forums to enable balanced debates on varying perspectives to show respect to all views with reasonable arguments.
  
@@ -28,10 +32,6 @@ The TSAR system is powered by BERT word embeddings and the system consists of mu
 * Sentiment Analysis - To find sentiments of Posts and Comments.
 * Relevance Score - To observe the relevance of Comments with respect to their Posts.
 * Conflicting Viewpoints - To observe the results of TSAR on the selected subreddit.
-
-**Project Poster and Flyer**  
-Project Poster can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/TSAR_POSTER.pdf).  
-Project Flyer can be found [here](https://github.com/reddit-conflicting-viewpoints/Reddit/blob/main/reports/Flyer.pdf).  
 
 ## Installation and Setup
 This tutorial will allow you to run the code locally on your own machine!  
