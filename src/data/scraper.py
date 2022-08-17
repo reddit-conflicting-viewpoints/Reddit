@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
 from typing import List
+
 from src.utils import get_project_root
 from contextlib import asynccontextmanager
 from config import ScraperConfig, default_config
@@ -136,7 +137,7 @@ class AsyncRedditScraper:
                                             post.link_flair_text,
                                             post.score,
                                             post.upvote_ratio,
-                                            post.subreddit,
+                                            # post.subreddit,
                                             post.url,
                                             post.num_comments,
                                             post.selftext,
@@ -145,14 +146,17 @@ class AsyncRedditScraper:
                 print(e)
 
         subreddit_df = pd.DataFrame(subreddit_retrieved, columns=['name', 'description', 'subscribers'])
+        subreddit_df['subreddit'] = subreddit_name
         posts_df = pd.DataFrame(posts_retrieved,
                                 columns=['post_id', 'title', 'flair', 'score', 'post_upvote_ratio',
-                                         'subreddit', 'url', 'num_comments', 'body', 'created'])
+                                         'url', 'num_comments', 'body', 'created'])
+        posts_df['subreddit'] = subreddit_name
         comments_df = pd.DataFrame(comments_retrieved,
                                    columns=['post_id', 'comment_id', 'parent_id',
                                             'comment', 'up_vote_count', 'controversiality',
                                             'total_awards_received', 'is_locked', 'is_collapsed',
                                             'is_submitter', 'created_utc'])
+        comments_df['subreddit'] = subreddit_name
         return SubRedditData(subreddit_name, subreddit_df, posts_df, comments_df)
 
     @async_retry(times=3, delay=10)
